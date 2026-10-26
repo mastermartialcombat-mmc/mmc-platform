@@ -10,6 +10,7 @@ let llavesSandaData = [];
 let taoluData = [];
 let medalleroData = [];
 let currentActiveLlave = null;
+let currentCategoryFiltered = "";
 
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
@@ -132,10 +133,11 @@ function initSandaModule(data, llavesData) {
 
     const categories = {};
     data.forEach(row => {
-        const genero = row.Genero || row.genero || "";
+        const edad = row.Rango_Edad || row.rango_edad || "";
         const nivel = row.Nivel || row.nivel || "";
+        const genero = row.Genero || row.genero || "";
         const peso = row.Peso || row.peso || "";
-        const catKey = `${genero} ${nivel} ${peso} KG`.trim();
+        const catKey = `${edad} ${nivel} ${genero} ${peso} KG`.trim();
         
         if (!categories[catKey]) categories[catKey] = [];
         categories[catKey].push(row);
@@ -157,6 +159,7 @@ function initSandaModule(data, llavesData) {
 }
 
 function filterSandaCategory(categoryName) {
+    currentCategoryFiltered = categoryName;
     document.querySelectorAll('.sanda-cat-btn').forEach(btn => {
         if (btn.innerText.trim() === categoryName) {
             btn.className = "sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition";
@@ -167,22 +170,93 @@ function filterSandaCategory(categoryName) {
 
     document.getElementById('bracket-category-title').innerText = categoryName;
 
-    const matchesContainer = document.getElementById('sanda-matches-list');
     const filtered = sandaData.filter(row => {
-        const genero = row.Genero || row.genero || "";
+        const edad = row.Rango_Edad || row.rango_edad || "";
         const nivel = row.Nivel || row.nivel || "";
+        const genero = row.Genero || row.genero || "";
         const peso = row.Peso || row.peso || "";
-        return `${genero} ${nivel} ${peso} KG`.trim() === categoryName;
+        return `${edad} ${nivel} ${genero} ${peso} KG`.trim() === categoryName;
     });
 
     const sampleNivel = (filtered[0]?.Nivel || filtered[0]?.nivel || "").toUpperCase();
     currentMatchLevel = sampleNivel.includes("NOVEL") ? "NOVEL" : "AVANZADO";
     resetTimer();
 
-    if (filtered.length === 0) {
-        matchesContainer.innerHTML = `<p class="text-xs text-gray-400 col-span-full">No hay deportistas en esta categoría.</p>`;
+    renderTournamentBrackets(filtered, llavesSandaData);
+    renderMatchesList(filtered);
+}
+
+function renderTournamentBrackets(filteredFighters, llavesData) {
+    const container = document.getElementById('tournament-brackets-container');
+    if (!container) return;
+
+    const pairs = {};
+    filteredFighters.forEach(row => {
+        const llave = row.ID_Llave || row.id_llave || "P01";
+        if (!pairs[llave]) pairs[llave] = [];
+        pairs[llave].push(row);
+    });
+
+    const llaveKeys = Object.keys(pairs);
+    if (llaveKeys.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-400 col-span-full">No hay llaves para esta categoría.</p>`;
         return;
     }
+
+    container.innerHTML = llaveKeys.map(llaveId => {
+        const fighters = pairs[llaveId];
+        const r = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0] || {};
+        const b = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || fighters[1] || {};
+
+        const llaveRow = llavesData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda) === llaveId);
+        const estadoLlave = llaveRow ? (llaveRow.Estado || llaveRow.estado || "Pendiente") : "Pendiente";
+
+        const redName = r.Nombre_Completo || r.nombre_completo || "Por definir";
+        const blueName = b.Nombre_Completo || b.nombre_completo || "Por definir";
+
+        const redObj = {
+            name: redName,
+            siglas: r.Siglas || r.siglas || "MMC",
+            inst: r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat",
+            photo: convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
+            logo: convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "")
+        };
+
+        const blueObj = {
+            name: blueName,
+            siglas: b.Siglas || b.siglas || "UPCH",
+            inst: b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
+            photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
+            logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
+        };
+
+        return `
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-lg">
+                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
+                    <span>LLAVE: ${llaveId}</span>
+                    <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">${estadoLlave}</span>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center bg-red-950/30 p-2 rounded border border-red-600/20">
+                        <span class="font-bold text-white truncate max-w-[180px]">${redName}</span>
+                        <span class="text-[10px] text-red-400 font-bold uppercase">Rojo</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-blue-950/30 p-2 rounded border border-blue-600/20">
+                        <span class="font-bold text-white truncate max-w-[180px]">${blueName}</span>
+                        <span class="text-[10px] text-blue-400 font-bold uppercase">Azul</span>
+                    </div>
+                </div>
+                <button class="w-full bg-slate-800 hover:bg-slate-700 text-mmcGold text-[10px] font-bold py-1.5 rounded uppercase transition">
+                    Cargar en Marcador
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderMatchesList(filtered) {
+    const matchesContainer = document.getElementById('sanda-matches-list');
+    if (!matchesContainer) return;
 
     const pairs = {};
     filtered.forEach(row => {
@@ -193,10 +267,8 @@ function filterSandaCategory(categoryName) {
 
     matchesContainer.innerHTML = Object.keys(pairs).map(llaveId => {
         const fighters = pairs[llaveId];
-        const r = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0];
+        const r = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0] || {};
         const b = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || fighters[1] || {};
-
-        const ordenLlave = llaveId.includes('/') ? llaveId.split('/')[1] : llaveId;
 
         const redObj = {
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
@@ -217,8 +289,8 @@ function filterSandaCategory(categoryName) {
         return `
             <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
                 <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                    <span>LLAVE: ${ordenLlave}</span>
-                    <span class="text-mmcGold">${categoryName}</span>
+                    <span>LLAVE: ${llaveId}</span>
+                    <span class="text-mmcGold">${currentCategoryFiltered}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-center text-xs">
                     <div class="bg-red-950/30 p-2 rounded border border-red-600/20 truncate">
@@ -240,7 +312,7 @@ function filterSandaCategory(categoryName) {
     if (Object.keys(pairs).length > 0) {
         const firstKey = Object.keys(pairs)[0];
         const firstPair = pairs[firstKey];
-        const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0];
+        const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0] || {};
         const b = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || firstPair[1] || {};
 
         selectSandaMatch({
@@ -322,7 +394,7 @@ function updateRoundCirclesFromSheets() {
 
     applyRoundCircleStyle(1, r1Winner, `${r1RedScore} / ${r1BlueScore}`);
     applyRoundCircleStyle(2, r2Winner, `${r2RedScore} / ${r2BlueScore}`);
-    applyRoundCircleStyle(3, r3Winner, `${r3Winner} / ${r3BlueScore}`);
+    applyRoundCircleStyle(3, r3Winner, `${r3RedScore} / ${r3BlueScore}`);
 }
 
 function applyRoundCircleStyle(roundNum, winnerColor, scoreText) {
