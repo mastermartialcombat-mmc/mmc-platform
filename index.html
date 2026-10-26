@@ -75,9 +75,14 @@
 
         <!-- Vista 2: SANSHOU -->
         <section id="view-sanda" class="view-section hidden space-y-6">
-            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-4 flex flex-wrap justify-between items-center gap-4">
-                <h3 class="text-sm font-bold text-white uppercase"><i class="fa-solid fa-filter text-mmcGold mr-2"></i> Categorías de Combate</h3>
-                <div id="sanda-category-filters" class="flex flex-wrap gap-2"></div>
+            <!-- Filtro Desplegable de Categorías de Combate -->
+            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="text-sm font-bold text-white uppercase flex items-center"><i class="fa-solid fa-filter text-mmcGold mr-2"></i> Categorías de Combate</h3>
+                <div class="w-full md:w-auto min-w-[320px]">
+                    <select id="sanda-category-select" onchange="filterSandaCategory(this.value)" class="w-full bg-slate-900 text-white border border-mmcBorder rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-mmcGold shadow-inner">
+                        <!-- Las opciones se cargan dinámicamente -->
+                    </select>
+                </div>
             </div>
 
             <!-- Transmisión de Video -->
@@ -89,7 +94,7 @@
                 </div>
             </div>
 
-            <!-- MARCADOR PRINCIPAL UNIFICADO EN UN SOLO BLOQUE ADAPTADO AL ANCHO DE PANTALLA -->
+            <!-- MARCADOR PRINCIPAL UNIFICADO -->
             <div class="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
                 
                 <!-- Esquina Roja -->
@@ -137,7 +142,7 @@
                         </button>
                     </div>
 
-                    <!-- 3 Círculos Minimalistas con sus puntajes reales debajo -->
+                    <!-- 3 Círculos Minimalistas con puntajes -->
                     <div class="grid grid-cols-3 gap-2 w-full pt-2 border-t border-slate-800">
                         <div class="flex flex-col items-center space-y-1">
                             <div id="round-circle-1" class="w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-800 shadow-inner"></div>
@@ -202,7 +207,7 @@
 
             </div>
 
-            <!-- SECCIÓN DE ÁRBOL DE LLAVES (ENCABEZADO OSCURO Y FONDO CLARO DE CONTRASTE) -->
+            <!-- SECCIÓN DE ÁRBOL DE LLAVES (DINÁMICO CON FASES Y FONDO CLARO) -->
             <div class="bg-mmcCard border border-mmcBorder rounded-xl overflow-hidden shadow-2xl">
                 <!-- Encabezado Oscuro Institucional -->
                 <div class="p-6 pb-4 border-b border-mmcBorder flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-mmcCard">
@@ -213,10 +218,10 @@
                     <span id="bracket-category-title" class="bg-slate-800 text-mmcGold text-xs font-black px-4 py-2 rounded-lg border border-mmcBorder uppercase shadow">---</span>
                 </div>
                 
-                <!-- Contenedor del Bracket con Fondo Claro de Contraste (Gris/Celeste casi blanco) -->
-                <div class="bg-slate-100 p-8 overflow-x-auto min-h-[420px] flex items-center justify-center">
-                    <div id="tournament-brackets-container" class="min-w-[950px] flex items-center justify-around gap-8 px-4">
-                        <!-- El árbol completo conectado se genera aquí dinámicamente -->
+                <!-- Contenedor del Bracket con Fondo Claro de Contraste -->
+                <div class="bg-slate-100 p-8 overflow-x-auto min-h-[450px] flex items-center justify-start">
+                    <div id="tournament-brackets-container" class="min-w-[1050px] w-full flex items-center justify-around gap-6 px-4">
+                        <!-- Las columnas de fases dinámicas se generan aquí -->
                     </div>
                 </div>
             </div>

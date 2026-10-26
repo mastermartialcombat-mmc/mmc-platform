@@ -128,8 +128,8 @@ let currentRound = 1;
 let isResting = false;
 
 function initSandaModule(data, llavesData) {
-    const filtersContainer = document.getElementById('sanda-category-filters');
-    if (!filtersContainer) return;
+    const selectEl = document.getElementById('sanda-category-select');
+    if (!selectEl) return;
 
     const categories = {};
     data.forEach(row => {
@@ -145,14 +145,12 @@ function initSandaModule(data, llavesData) {
 
     const catKeys = Object.keys(categories);
     if (catKeys.length === 0) {
-        filtersContainer.innerHTML = `<span class="text-xs text-gray-400">No hay categorías configuradas.</span>`;
+        selectEl.innerHTML = `<option value="">No hay categorías configuradas</option>`;
         return;
     }
 
-    filtersContainer.innerHTML = catKeys.map((cat, idx) => `
-        <button onclick="filterSandaCategory('${cat}')" id="cat-btn-${idx}" class="sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold ${idx === 0 ? 'bg-mmcGold text-black' : 'bg-slate-800 text-gray-300 hover:bg-slate-700'} transition">
-            ${cat}
-        </button>
+    selectEl.innerHTML = catKeys.map(cat => `
+        <option value="${cat}">${cat}</option>
     `).join('');
 
     filterSandaCategory(catKeys[0]);
@@ -160,13 +158,10 @@ function initSandaModule(data, llavesData) {
 
 function filterSandaCategory(categoryName) {
     currentCategoryFiltered = categoryName;
-    document.querySelectorAll('.sanda-cat-btn').forEach(btn => {
-        if (btn.innerText.trim() === categoryName) {
-            btn.className = "sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition";
-        } else {
-            btn.className = "sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-gray-300 hover:bg-slate-700 transition";
-        }
-    });
+    const selectEl = document.getElementById('sanda-category-select');
+    if (selectEl && selectEl.value !== categoryName) {
+        selectEl.value = categoryName;
+    }
 
     document.getElementById('bracket-category-title').innerText = categoryName;
     document.getElementById('bracket-subtitle-info').innerText = `Sanshou • Categoría: ${categoryName} • Eliminación Directa`;
@@ -187,7 +182,7 @@ function filterSandaCategory(categoryName) {
     renderMatchesList(filtered);
 }
 
-// Renderizar Árbol de Llaves conectado con flujo de ganadores y fondo claro de contraste
+// Renderizar Árbol de Llaves con Fases Dinámicas y Fondo Claro
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
@@ -205,12 +200,32 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         return;
     }
 
-    // Filtrar llaves preliminares (P01, P02, etc.) y llaves de avance (P03 / Semifinal / Final)
-    const prelimKeys = llaveKeys.filter(k => k.includes('P') && (k.endsWith('01') || k.endsWith('02') || llaveKeys.indexOf(k) < llaveKeys.length - 1));
-    const finalKeys = llaveKeys.filter(k => !prelimKeys.includes(k) || k === llaveKeys[llaveKeys.length - 1]);
+    // Clasificar llaves dinámicamente según la cantidad o identificadores
+    const dieciseisavos = llaveKeys.filter(k => k.includes('D') || (llaveKeys.length > 8 && llaveKeys.indexOf(k) < llaveKeys.length - 7));
+    const octavos = llaveKeys.filter(k => k.includes('O') || (llaveKeys.length > 4 && llaveKeys.length <= 8 && llaveKeys.indexOf(k) < llaveKeys.length - 3));
+    const cuartos = llaveKeys.filter(k => k.includes('C') || (llaveKeys.length > 2 && llaveKeys.length <= 4));
+    const semifinal = llaveKeys.filter(k => k.includes('S') || (llaveKeys.length === 3));
+    const final = llaveKeys.filter(k => k.includes('F') || k === llaveKeys[llaveKeys.length - 1] || llaveKeys.length <= 2);
 
-    const r1 = prelimKeys.length > 0 ? prelimKeys : llaveKeys.slice(0, Math.max(1, llaveKeys.length - 1));
-    const r2 = finalKeys.length > 0 ? finalKeys : llaveKeys.slice(-1);
+    // Si no hay prefijos estrictos, dividir en cascada según el total de llaves
+    let phases = [];
+    if (llaveKeys.length >= 15) {
+        phases.push({ name: "Dieciseisavos", keys: llaveKeys.slice(0, 8) });
+        phases.push({ name: "Octavos", keys: llaveKeys.slice(8, 12) });
+        phases.push({ name: "Cuartos", keys: llaveKeys.slice(12, 14) });
+        phases.push({ name: "Semifinal", keys: [llaveKeys[llaveKeys.length - 2]] });
+        phases.push({ name: "Final", keys: [llaveKeys[llaveKeys.length - 1]] });
+    } else if (llaveKeys.length >= 7) {
+        phases.push({ name: "Octavos", keys: llaveKeys.slice(0, 4) });
+        phases.push({ name: "Cuartos", keys: llaveKeys.slice(4, 6) });
+        phases.push({ name: "Semifinal", keys: [llaveKeys[llaveKeys.length - 2]] });
+        phases.push({ name: "Final", keys: [llaveKeys[llaveKeys.length - 1]] });
+    } else if (llaveKeys.length >= 3) {
+        phases.push({ name: "Cuartos / Prelim.", keys: llaveKeys.slice(0, llaveKeys.length - 1) });
+        phases.push({ name: "Semifinal / Final", keys: [llaveKeys[llaveKeys.length - 1]] });
+    } else {
+        phases.push({ name: "Gran Final", keys: llaveKeys });
+    }
 
     const createCardHtml = (llaveId) => {
         const fighters = pairs[llaveId] || [];
@@ -244,18 +259,18 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-lg transition w-[270px] flex-shrink-0 my-3">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-lg transition w-[260px] flex-shrink-0 my-3">
                 <div class="bg-slate-900 px-3 py-2 flex justify-between items-center border-b border-slate-700">
                     <span class="bg-slate-800 text-white font-mono text-xs font-black px-2.5 py-0.5 rounded border border-slate-600">${llaveId}</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded ${estadoLlave.toUpperCase() === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
                 <div class="p-3 space-y-2">
                     <div class="flex justify-between items-center bg-red-50 px-3 py-2 rounded border-l-4 border-red-600 shadow-sm">
-                        <span class="text-xs truncate max-w-[180px] ${redClass}">${redName}</span>
+                        <span class="text-xs truncate max-w-[170px] ${redClass}">${redName}</span>
                         <span class="text-[9px] font-black text-red-600">ROJO</span>
                     </div>
                     <div class="flex justify-between items-center bg-blue-50 px-3 py-2 rounded border-l-4 border-blue-600 shadow-sm">
-                        <span class="text-xs truncate max-w-[180px] ${blueClass}">${blueName}</span>
+                        <span class="text-xs truncate max-w-[170px] ${blueClass}">${blueName}</span>
                         <span class="text-[9px] font-black text-blue-600">AZUL</span>
                     </div>
                 </div>
@@ -263,32 +278,22 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         `;
     };
 
-    container.innerHTML = `
-        <div class="flex items-center justify-around w-full gap-12 overflow-x-auto py-2">
-            <!-- Columna 1: Llaves Preliminares (P01, P02) -->
-            <div class="flex flex-col justify-around space-y-6">
-                ${r1.map(k => createCardHtml(k)).join('')}
-            </div>
-
-            <!-- Conectores SVG que unen P01 y P02 hacia P03 -->
-            <div class="flex flex-col items-center justify-center">
-                <svg width="60" height="260" class="stroke-slate-400 stroke-[3] fill-none">
-                    <path d="M 0 70 Q 30 70, 30 130 T 60 190" />
-                    <path d="M 0 210 Q 30 210, 30 130 T 60 70" />
-                </svg>
-            </div>
-
-            <!-- Columna 2: Siguiente Llave (ej. P03 / Disputa Final) -->
-            <div class="flex flex-col justify-center">
-                ${r2.length > 0 ? createCardHtml(r2[r2.length - 1]) : `
-                    <div class="bg-white border-2 border-mmcGold/80 rounded-xl p-6 w-[270px] text-center space-y-2 shadow-xl">
-                        <span class="text-[10px] font-bold text-mmcGold uppercase"><i class="fa-solid fa-trophy mr-1"></i> Gran Final</span>
-                        <p class="text-xs font-bold text-slate-800">Disputa por el Oro</p>
-                    </div>
-                `}
+    container.innerHTML = phases.map((phase, pIdx) => `
+        <div class="flex flex-col items-center space-y-4">
+            <span class="text-[11px] font-black text-slate-700 uppercase tracking-widest bg-slate-200 px-3 py-1 rounded-md border border-slate-300 shadow-sm">${phase.name}</span>
+            <div class="flex flex-col justify-around space-y-4">
+                ${phase.keys.map(k => createCardHtml(k)).join('')}
             </div>
         </div>
-    `;
+        ${pIdx < phases.length - 1 ? `
+            <div class="flex flex-col items-center justify-center">
+                <svg width="45" height="220" class="stroke-slate-400 stroke-[3] fill-none">
+                    <path d="M 0 55 Q 22 55, 22 110 T 45 165" />
+                    <path d="M 0 165 Q 22 165, 22 110 T 45 55" />
+                </svg>
+            </div>
+        ` : ''}
+    `).join('');
 }
 
 function renderMatchesList(filtered) {
