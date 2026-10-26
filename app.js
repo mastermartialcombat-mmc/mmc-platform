@@ -1,7 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Recuerda mantener tu URL real de Apps Script
 const LOGO_DRIVE_URL = "https://drive.google.com/file/d/1EM8MEbYssMssn1NKQfAIqA6n3Fvr1Zrb/view?usp=drive_link";
 
-// Enlaces de fondo proporcionados para las esquinas (convertidos automáticamente)
 const FONDO_ROJA_URL = "https://drive.google.com/file/d/19XJR7ZobDCXDTe8S3Dsq3EF50emXlz_Q/view?usp=drive_link";
 const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3LHiO8tFjV/view?usp=drive_link";
 
@@ -10,6 +9,7 @@ let sandaData = [];
 let llavesSandaData = [];
 let taoluData = [];
 let medalleroData = [];
+let roundWinners = { 1: null, 2: null, 3: null };
 
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
@@ -24,16 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoImg = document.getElementById('nav-logo');
     if (logoImg) logoImg.src = convertToDirectDriveUrl(LOGO_DRIVE_URL);
 
-    // Aplicar fondos de esquina directamente en las tarjetas de Sanshou
     const cardRoja = document.getElementById('card-esquina-roja');
-    if (cardRoja) {
-        cardRoja.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_ROJA_URL)}')`;
-    }
+    if (cardRoja) cardRoja.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_ROJA_URL)}')`;
 
     const cardAzul = document.getElementById('card-esquina-azul');
-    if (cardAzul) {
-        cardAzul.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_AZUL_URL)}')`;
-    }
+    if (cardAzul) cardAzul.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_AZUL_URL)}')`;
 
     loadAllData();
 });
@@ -268,7 +263,6 @@ function selectSandaMatch(red, blue, ordenLlave) {
     document.getElementById('sanda-red-siglas').innerText = red.siglas;
     document.getElementById('sanda-red-inst').innerText = red.inst;
 
-    // Foto centrada con el borde superior alineado al contenedor
     const redPhotoBox = document.getElementById('sanda-red-photo-container');
     if (redPhotoBox) {
         redPhotoBox.innerHTML = red.photo ? `<img src="${red.photo}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>`;
@@ -292,10 +286,35 @@ function selectSandaMatch(red, blue, ordenLlave) {
     if (blueSchoolLogo) {
         blueSchoolLogo.innerHTML = blue.logo ? `<img src="${blue.logo}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
     }
+}
 
-    if (ordenLlave) {
-        console.log(`Combate cargado: Llave ${ordenLlave}`);
+// Modal de Ganador por Round
+function openRoundWinnerModal() {
+    document.getElementById('modal-round-tag').innerText = `ASALTO ${currentRound}`;
+    document.getElementById('round-winner-modal').classList.remove('hidden');
+}
+
+function closeRoundWinnerModal() {
+    document.getElementById('round-winner-modal').classList.add('hidden');
+}
+
+function setRoundWinner(color) {
+    roundWinners[currentRound] = color;
+    const box = document.getElementById(`round-box-${currentRound}`);
+    const winnerLabel = document.getElementById(`round-winner-${currentRound}`);
+
+    if (box && winnerLabel) {
+        if (color === 'ROJO') {
+            box.className = "w-8 h-8 rounded-full border-2 border-red-500 bg-red-600 text-white flex items-center justify-center font-bold text-xs shadow";
+            winnerLabel.innerText = "GANÓ ROJO";
+            winnerLabel.className = "text-[9px] font-extrabold text-red-400";
+        } else {
+            box.className = "w-8 h-8 rounded-full border-2 border-blue-500 bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow";
+            winnerLabel.innerText = "GANÓ AZUL";
+            winnerLabel.className = "text-[9px] font-extrabold text-blue-400";
+        }
     }
+    closeRoundWinnerModal();
 }
 
 // Cronómetro
@@ -345,13 +364,6 @@ function nextRound() {
     document.getElementById('sanda-round-title').innerText = `ASALTO ${currentRound} / 3`;
     document.getElementById('sanda-level-badge').innerText = `Nivel ${currentMatchLevel} (${currentMatchLevel === "NOVEL" ? "1:30" : "2:00"} min)`;
     
-    for(let i=1; i<=3; i++) {
-        const dot = document.getElementById(`round-dot-${i}`);
-        if(i < currentRound) dot.className = "w-3.5 h-3.5 rounded-full bg-red-600";
-        else if(i === currentRound) dot.className = "w-3.5 h-3.5 rounded-full bg-red-500 ring-2 ring-red-400 animate-pulse";
-        else dot.className = "w-3.5 h-3.5 rounded-full bg-slate-800 border border-gray-600";
-    }
-
     updateTimerDisplay();
     document.getElementById('timer-btn').innerHTML = `<i class="fa-solid fa-play"></i>`;
 }
@@ -362,14 +374,21 @@ function resetTimer() {
     isResting = false;
     currentRound = 1;
     secondsLeft = currentMatchLevel === "NOVEL" ? 90 : 120;
+    roundWinners = { 1: null, 2: null, 3: null };
     
     document.getElementById('sanda-round-title').innerText = `ASALTO 1 / 3`;
     document.getElementById('sanda-level-badge').innerText = `Nivel ${currentMatchLevel} (${currentMatchLevel === "NOVEL" ? "1:30" : "2:00"} min)`;
     
     for(let i=1; i<=3; i++) {
-        const dot = document.getElementById(`round-dot-${i}`);
-        if(i === 1) dot.className = "w-3.5 h-3.5 rounded-full bg-red-500 ring-2 ring-red-400";
-        else dot.className = "w-3.5 h-3.5 rounded-full bg-slate-800 border border-gray-600";
+        const box = document.getElementById(`round-box-${i}`);
+        const label = document.getElementById(`round-winner-${i}`);
+        if(i === 1) {
+            box.className = "w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 text-red-400 flex items-center justify-center font-bold text-xs shadow";
+        } else {
+            box.className = "w-8 h-8 rounded-full border-2 border-slate-700 bg-slate-800 text-gray-400 flex items-center justify-center font-bold text-xs shadow";
+        }
+        label.innerText = "PENDIENTE";
+        label.className = "text-[9px] font-extrabold text-gray-400";
     }
 
     updateTimerDisplay();
