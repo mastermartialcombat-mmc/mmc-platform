@@ -169,6 +169,7 @@ function filterSandaCategory(categoryName) {
     });
 
     document.getElementById('bracket-category-title').innerText = categoryName;
+    document.getElementById('bracket-subtitle-info').innerText = `Sanshou • Categoría: ${categoryName} • Eliminación Directa`;
 
     const filtered = sandaData.filter(row => {
         const edad = row.Rango_Edad || row.rango_edad || "";
@@ -231,24 +232,30 @@ function renderTournamentBrackets(filteredFighters, llavesData) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-lg">
-                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                    <span>LLAVE: ${llaveId}</span>
-                    <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">${estadoLlave}</span>
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-black/40 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-xl transition space-y-0">
+                <!-- Cuadro Oscuro Superior con Número/Código de Llave (Estilo Referencia) -->
+                <div class="bg-slate-900 px-4 py-2 flex justify-between items-center border-b border-mmcBorder">
+                    <span class="bg-slate-950 text-white font-mono text-xs font-black px-2.5 py-1 rounded border border-slate-700 shadow-inner">${llaveId}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${estadoLlave === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
-                <div class="space-y-1.5 text-xs">
-                    <div class="flex justify-between items-center bg-red-950/30 p-2 rounded border border-red-600/20">
-                        <span class="font-bold text-white truncate max-w-[180px]">${redName}</span>
-                        <span class="text-[10px] text-red-400 font-bold uppercase">Rojo</span>
+                
+                <!-- Tarjeta de Contendientes (Rojo Arriba, Azul Abajo) -->
+                <div class="p-3 space-y-1.5">
+                    <div class="flex justify-between items-center bg-red-950/40 px-3 py-2 rounded-lg border-l-4 border-red-600">
+                        <span class="font-bold text-xs text-white truncate">${redName}</span>
+                        <span class="text-[9px] font-black text-red-400 uppercase tracking-wider">ROJO</span>
                     </div>
-                    <div class="flex justify-between items-center bg-blue-950/30 p-2 rounded border border-blue-600/20">
-                        <span class="font-bold text-white truncate max-w-[180px]">${blueName}</span>
-                        <span class="text-[10px] text-blue-400 font-bold uppercase">Azul</span>
+                    <div class="flex justify-between items-center bg-blue-950/40 px-3 py-2 rounded-lg border-l-4 border-blue-600">
+                        <span class="font-bold text-xs text-white truncate">${blueName}</span>
+                        <span class="text-[9px] font-black text-blue-400 uppercase tracking-wider">AZUL</span>
                     </div>
                 </div>
-                <button class="w-full bg-slate-800 hover:bg-slate-700 text-mmcGold text-[10px] font-bold py-1.5 rounded uppercase transition">
-                    Cargar en Marcador
-                </button>
+
+                <div class="px-3 pb-3">
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-mmcGold text-[10px] font-bold py-1.5 rounded uppercase tracking-wider transition">
+                        Cargar en Marcador En Vivo
+                    </button>
+                </div>
             </div>
         `;
     }).join('');
