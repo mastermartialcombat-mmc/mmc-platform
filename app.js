@@ -182,11 +182,12 @@ function filterSandaCategory(categoryName) {
     renderMatchesList(filtered);
 }
 
-// Renderizar Árbol de Llaves con Fases Dinámicas y Fondo Claro
+// Renderizar Árbol de Llaves basándose en Orden_de_Final y Ganador_a_Ingresar
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
 
+    // Agrupar peleadores de la categoría por ID_Llave
     const pairs = {};
     filteredFighters.forEach(row => {
         const llave = row.ID_Llave || row.id_llave || "P01";
@@ -196,36 +197,43 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
 
     const llaveKeys = Object.keys(pairs);
     if (llaveKeys.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-500 col-span-full">No hay llaves para esta categoría.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 font-bold col-span-full">No hay llaves registradas para esta categoría.</p>`;
         return;
     }
 
-    // Clasificar llaves dinámicamente según la cantidad o identificadores
-    const dieciseisavos = llaveKeys.filter(k => k.includes('D') || (llaveKeys.length > 8 && llaveKeys.indexOf(k) < llaveKeys.length - 7));
-    const octavos = llaveKeys.filter(k => k.includes('O') || (llaveKeys.length > 4 && llaveKeys.length <= 8 && llaveKeys.indexOf(k) < llaveKeys.length - 3));
-    const cuartos = llaveKeys.filter(k => k.includes('C') || (llaveKeys.length > 2 && llaveKeys.length <= 4));
-    const semifinal = llaveKeys.filter(k => k.includes('S') || (llaveKeys.length === 3));
-    const final = llaveKeys.filter(k => k.includes('F') || k === llaveKeys[llaveKeys.length - 1] || llaveKeys.length <= 2);
+    // Mapear cada llave con su Orden_de_Final registrado en la hoja Llaves_Sanda
+    const phaseOrderMap = {
+        "DIECISEISAVOS DE FINAL": 1,
+        "OCTAVOS DE FINAL": 2,
+        "CUARTOS DE FINAL": 3,
+        "SEMIFINAL": 4,
+        "FINAL": 5
+    };
 
-    // Si no hay prefijos estrictos, dividir en cascada según el total de llaves
-    let phases = [];
-    if (llaveKeys.length >= 15) {
-        phases.push({ name: "Dieciseisavos", keys: llaveKeys.slice(0, 8) });
-        phases.push({ name: "Octavos", keys: llaveKeys.slice(8, 12) });
-        phases.push({ name: "Cuartos", keys: llaveKeys.slice(12, 14) });
-        phases.push({ name: "Semifinal", keys: [llaveKeys[llaveKeys.length - 2]] });
-        phases.push({ name: "Final", keys: [llaveKeys[llaveKeys.length - 1]] });
-    } else if (llaveKeys.length >= 7) {
-        phases.push({ name: "Octavos", keys: llaveKeys.slice(0, 4) });
-        phases.push({ name: "Cuartos", keys: llaveKeys.slice(4, 6) });
-        phases.push({ name: "Semifinal", keys: [llaveKeys[llaveKeys.length - 2]] });
-        phases.push({ name: "Final", keys: [llaveKeys[llaveKeys.length - 1]] });
-    } else if (llaveKeys.length >= 3) {
-        phases.push({ name: "Cuartos / Prelim.", keys: llaveKeys.slice(0, llaveKeys.length - 1) });
-        phases.push({ name: "Semifinal / Final", keys: [llaveKeys[llaveKeys.length - 1]] });
-    } else {
-        phases.push({ name: "Gran Final", keys: llaveKeys });
-    }
+    const groupedPhases = {};
+
+    llaveKeys.forEach(llaveId => {
+        const llaveRow = llavesData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda || row.ID_Llave) === llaveId);
+        let phaseName = llaveRow ? (llaveRow.Orden_de_Final || llaveRow.orden_de_final || "").trim().toUpperCase() : "";
+
+        // Si no se encuentra un Orden_de_Final explícito, asignar por defecto segun la cantidad de llaves
+        if (!phaseName) {
+            if (llaveKeys.length >= 8) phaseName = "OCTAVOS DE FINAL";
+            else if (llaveKeys.length >= 4) phaseName = "CUARTOS DE FINAL";
+            else if (llaveKeys.length >= 2) phaseName = "SEMIFINAL";
+            else phaseName = "FINAL";
+        }
+
+        if (!groupedPhases[phaseName]) groupedPhases[phaseName] = [];
+        groupedPhases[phaseName].push(llaveId);
+    });
+
+    // Ordenar únicamente las fases que sí tienen llaves registradas
+    const activePhaseNames = Object.keys(groupedPhases).sort((a, b) => {
+        const orderA = phaseOrderMap[a] || 99;
+        const orderB = phaseOrderMap[b] || 99;
+        return orderA - orderB;
+    });
 
     const createCardHtml = (llaveId) => {
         const fighters = pairs[llaveId] || [];
@@ -236,31 +244,36 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const estadoLlave = llaveRow ? (llaveRow.Estado || llaveRow.estado || "Pendiente") : "Pendiente";
         const ganadorOficial = llaveRow ? (llaveRow.Ganador || llaveRow.ganador || "").toUpperCase() : "";
 
-        const redName = r.Nombre_Completo || r.nombre_completo || "Ganador previo";
-        const blueName = b.Nombre_Completo || b.nombre_completo || "Ganador previo";
+        // Validar si hay DNI_Participante registrado
+        const redDni = (r.DNI_Participante || r.dni_participante || "").toString().trim();
+        const blueDni = (b.DNI_Participante || b.dni_participante || "").toString().trim();
 
-        const redClass = ganadorOficial === "AZUL" ? "text-gray-400 line-through opacity-50" : "text-slate-900 font-extrabold";
-        const blueClass = ganadorOficial === "ROJO" ? "text-gray-400 line-through opacity-50" : "text-slate-900 font-extrabold";
+        // Determinar el nombre a mostrar (Nombre_Completo o Ganador_a_Ingresar)
+        const redName = redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Ganador de llave previa");
+        const blueName = blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Ganador de llave previa");
+
+        const redClass = redDni ? (ganadorOficial === "AZUL" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
+        const blueClass = blueDni ? (ganadorOficial === "ROJO" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
 
         const redObj = {
-            name: redName,
-            siglas: r.Siglas || r.siglas || "MMC",
-            inst: r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat",
-            photo: convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
-            logo: convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "")
+            name: redDni ? redName : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Por definir"),
+            siglas: redDni ? (r.Siglas || r.siglas || "") : "",
+            inst: redDni ? (r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "") : "",
+            photo: redDni ? convertToDirectDriveUrl(r.URL_Foto || r.url_foto || "") : "",
+            logo: redDni ? convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "") : ""
         };
 
         const blueObj = {
-            name: blueName,
-            siglas: b.Siglas || b.siglas || "UPCH",
-            inst: b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
-            photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
-            logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
+            name: blueDni ? blueName : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Por definir"),
+            siglas: blueDni ? (b.Siglas || b.siglas || "") : "",
+            inst: blueDni ? (b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "") : "",
+            photo: blueDni ? convertToDirectDriveUrl(b.URL_Foto || b.url_foto || "") : "",
+            logo: blueDni ? convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "") : ""
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-lg transition w-[260px] flex-shrink-0 my-3">
-                <div class="bg-slate-900 px-3 py-2 flex justify-between items-center border-b border-slate-700">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-xl transition w-[260px] flex-shrink-0 my-3">
+                <div class="bg-slate-900 px-3 py-1.5 flex justify-between items-center border-b border-slate-700">
                     <span class="bg-slate-800 text-white font-mono text-xs font-black px-2.5 py-0.5 rounded border border-slate-600">${llaveId}</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded ${estadoLlave.toUpperCase() === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
@@ -278,14 +291,15 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         `;
     };
 
-    container.innerHTML = phases.map((phase, pIdx) => `
+    // Generar la estructura gráfica dinámica por fases con conectores SVG
+    container.innerHTML = activePhaseNames.map((phaseName, pIdx) => `
         <div class="flex flex-col items-center space-y-4">
-            <span class="text-[11px] font-black text-slate-700 uppercase tracking-widest bg-slate-200 px-3 py-1 rounded-md border border-slate-300 shadow-sm">${phase.name}</span>
+            <span class="text-[11px] font-black text-slate-800 uppercase tracking-widest bg-slate-200/80 px-3 py-1 rounded-md border border-slate-300 shadow-sm">${phaseName}</span>
             <div class="flex flex-col justify-around space-y-4">
-                ${phase.keys.map(k => createCardHtml(k)).join('')}
+                ${groupedPhases[phaseName].map(k => createCardHtml(k)).join('')}
             </div>
         </div>
-        ${pIdx < phases.length - 1 ? `
+        ${pIdx < activePhaseNames.length - 1 ? `
             <div class="flex flex-col items-center justify-center">
                 <svg width="45" height="220" class="stroke-slate-400 stroke-[3] fill-none">
                     <path d="M 0 55 Q 22 55, 22 110 T 45 165" />
