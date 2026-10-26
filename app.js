@@ -187,7 +187,7 @@ function filterSandaCategory(categoryName) {
     renderMatchesList(filtered);
 }
 
-// Renderizar Árbol de Llaves conectado por SVG sin títulos de fases
+// Renderizar Árbol de Llaves limpio con conexión por SVG y sin botón "Cargar en Marcador"
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
@@ -225,8 +225,8 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const redName = r.Nombre_Completo || r.nombre_completo || "Por definir";
         const blueName = b.Nombre_Completo || b.nombre_completo || "Por definir";
 
-        const redClass = ganadorOficial === "AZUL" ? "text-gray-500 line-through opacity-60" : "text-white font-bold";
-        const blueClass = ganadorOficial === "ROJO" ? "text-gray-500 line-through opacity-60" : "text-white font-bold";
+        const redClass = ganadorOficial === "AZUL" ? "text-gray-500 line-through opacity-50" : "text-white font-bold";
+        const blueClass = ganadorOficial === "ROJO" ? "text-gray-500 line-through opacity-50" : "text-white font-bold";
 
         const redObj = {
             name: redName,
@@ -245,69 +245,64 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900/90 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-xl transition w-[260px] flex-shrink-0 my-2">
-                <div class="bg-slate-950 px-3 py-1.5 flex justify-between items-center border-b border-mmcBorder">
-                    <span class="bg-slate-900 text-white font-mono text-xs font-black px-2 py-0.5 rounded border border-slate-700">${llaveId}</span>
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-xl transition w-[270px] flex-shrink-0 my-3">
+                <div class="bg-slate-950 px-3 py-2 flex justify-between items-center border-b border-mmcBorder">
+                    <span class="bg-slate-900 text-white font-mono text-xs font-black px-2.5 py-0.5 rounded border border-slate-700">${llaveId}</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded ${estadoLlave.toUpperCase() === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
-                <div class="p-2.5 space-y-1.5">
-                    <div class="flex justify-between items-center bg-red-950/40 px-2.5 py-1.5 rounded border-l-4 border-red-600">
-                        <span class="text-xs truncate max-w-[170px] ${redClass}">${redName}</span>
+                <div class="p-3 space-y-2">
+                    <div class="flex justify-between items-center bg-red-950/40 px-3 py-2 rounded border-l-4 border-red-600">
+                        <span class="text-xs truncate max-w-[180px] ${redClass}">${redName}</span>
                         <span class="text-[9px] font-black text-red-400">ROJO</span>
                     </div>
-                    <div class="flex justify-between items-center bg-blue-950/40 px-2.5 py-1.5 rounded border-l-4 border-blue-600">
-                        <span class="text-xs truncate max-w-[170px] ${blueClass}">${blueName}</span>
+                    <div class="flex justify-between items-center bg-blue-950/40 px-3 py-2 rounded border-l-4 border-blue-600">
+                        <span class="text-xs truncate max-w-[180px] ${blueClass}">${blueName}</span>
                         <span class="text-[9px] font-black text-blue-400">AZUL</span>
                     </div>
-                </div>
-                <div class="px-2.5 pb-2">
-                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-mmcGold text-[9px] font-bold py-1 rounded uppercase tracking-wider transition">
-                        Cargar en Marcador
-                    </button>
                 </div>
             </div>
         `;
     };
 
     container.innerHTML = `
-        <div class="flex items-center justify-between w-full gap-8 overflow-x-auto py-4">
-            <!-- Columna 1 -->
+        <div class="flex items-center justify-between w-full gap-8 overflow-x-auto py-2">
+            <!-- Columna 1 (Llaves Preliminares ej. P01, P02) -->
             <div class="flex flex-col justify-around space-y-4">
                 ${r1.map(k => createCardHtml(k)).join('')}
             </div>
 
             <!-- Conectores SVG 1 a 2 -->
             <div class="flex flex-col items-center justify-center">
-                <svg width="40" height="220" class="stroke-slate-700 stroke-2 fill-none">
-                    <path d="M 0 50 Q 20 50, 20 110 T 40 170" />
-                    <path d="M 0 170 Q 20 170, 20 110 T 40 50" />
+                <svg width="45" height="240" class="stroke-slate-500 stroke-2 fill-none">
+                    <path d="M 0 60 Q 22 60, 22 120 T 45 180" />
+                    <path d="M 0 180 Q 22 180, 22 120 T 45 60" />
                 </svg>
             </div>
 
-            <!-- Columna 2 -->
+            <!-- Columna 2 (Llave siguiente ej. P03 / Semifinal) -->
             <div class="flex flex-col justify-around space-y-8">
                 ${r2.length > 0 ? r2.map(k => createCardHtml(k)).join('') : `
-                    <div class="bg-slate-900 border border-mmcBorder rounded-xl p-4 w-[260px] text-center space-y-2">
+                    <div class="bg-slate-900 border border-mmcBorder rounded-xl p-4 w-[270px] text-center space-y-2">
                         <span class="text-[10px] font-bold text-mmcGold uppercase">Siguiente Llave</span>
-                        <p class="text-xs text-gray-400">Por definir ganadores</p>
+                        <p class="text-xs text-gray-400">Esperando ganadores</p>
                     </div>
                 `}
             </div>
 
             <!-- Conectores SVG 2 a 3 -->
             <div class="flex flex-col items-center justify-center">
-                <svg width="40" height="150" class="stroke-slate-700 stroke-2 fill-none">
-                    <path d="M 0 38 Q 20 38, 20 75 T 40 112" />
-                    <path d="M 0 112 Q 20 112, 20 75 T 40 75" />
+                <svg width="45" height="160" class="stroke-slate-500 stroke-2 fill-none">
+                    <path d="M 0 40 Q 22 40, 22 80 T 45 120" />
+                    <path d="M 0 120 Q 22 120, 22 80 T 45 80" />
                 </svg>
             </div>
 
-            <!-- Columna 3 (Final / Oro) -->
+            <!-- Columna 3 (Gran Final / Oro) -->
             <div class="flex flex-col justify-center">
                 ${r3.length > 0 ? r3.map(k => createCardHtml(k)).join('') : `
-                    <div class="bg-slate-900 border-2 border-mmcGold/60 rounded-xl p-5 w-[260px] text-center space-y-2 shadow-xl">
+                    <div class="bg-slate-900 border-2 border-mmcGold/60 rounded-xl p-6 w-[270px] text-center space-y-2 shadow-xl">
                         <span class="text-[10px] font-bold text-mmcGold uppercase"><i class="fa-solid fa-trophy mr-1"></i> Gran Final</span>
-                        <p class="text-xs font-bold text-white">Disputa por el Campeonato</p>
+                        <p class="text-xs font-bold text-white">Disputa por el Oro</p>
                     </div>
                 `}
             </div>
