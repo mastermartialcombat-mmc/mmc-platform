@@ -32,12 +32,9 @@
     <!-- Header / Navbar Desktop -->
     <header class="bg-mmcCard/90 backdrop-blur border-b border-mmcBorder sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <!-- Logotipo oficial de Drive con respaldo -->
+            <!-- Logotipo oficial dinámico desde Drive -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
-                <div class="flex items-center space-x-2">
-                    <img src="https://drive.google.com/uc?export=view&id=1EM8MEbYssMssn1NKQfAIqA6n3Fvr1Zrb" alt="MMC Logo" class="h-10 w-auto object-contain" onerror="this.style.display='none'">
-                    <span class="bg-mmcGold text-black font-black px-2 py-0.5 rounded text-lg tracking-tighter">MMC</span>
-                </div>
+                <img id="nav-logo" src="" alt="MMC Logo" class="h-10 w-auto object-contain rounded" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'">
                 <div>
                     <h1 class="text-xs md:text-sm font-bold tracking-wider uppercase text-white leading-none">Master Martial Combat</h1>
                     <span class="text-[9px] md:text-[10px] text-mmcGold font-semibold tracking-widest uppercase">Wushu • Sanda • Taolu</span>
@@ -103,18 +100,56 @@
             </div>
         </section>
 
-        <!-- Vista 3: TAOLU -->
+        <!-- Vista 3: TAOLU (Actualizada con Grupos y Transmisión) -->
         <section id="view-taolu" class="view-section hidden space-y-6">
-            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 text-center">
-                <h3 class="text-xl font-bold text-white uppercase mb-4">Taolu - Órdenes de Salida</h3>
-                <p class="text-gray-400 text-sm">Listado de deportistas y puntajes en tiempo real.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Transmisión de Taolu en vivo -->
+                <div class="lg:col-span-2 bg-black rounded-xl border border-mmcBorder overflow-hidden relative min-h-[300px] flex items-center justify-center">
+                    <iframe id="taolu-stream" class="w-full h-full absolute inset-0" src="https://www.youtube.com/embed/live_stream?channel=UC..." frameborder="0" allowfullscreen></iframe>
+                    <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur px-3 py-1.5 rounded-lg border border-mmcBorder text-xs text-mmcGold font-bold">
+                        <i class="fa-solid fa-video mr-1 text-red-500 animate-pulse"></i> Transmisión en Vivo - Taolu
+                    </div>
+                </div>
+
+                <!-- Cuadro de Atleta y Puntaje Obtenido -->
+                <div class="bg-mmcCard border border-mmcBorder rounded-xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="text-center border-b border-mmcBorder pb-3">
+                        <span class="text-xs text-mmcGold font-bold uppercase tracking-wider">Atleta en Competencia</span>
+                        <div id="taolu-avatar-container" class="w-16 h-16 bg-slate-800 rounded-full mx-auto my-2 overflow-hidden border-2 border-mmcGold flex items-center justify-center">
+                            <i class="fa-solid fa-user text-2xl text-gray-500"></i>
+                        </div>
+                        <h4 id="taolu-selected-name" class="text-base font-black text-white">Selecciona un deportista</h4>
+                        <span id="taolu-selected-forma" class="text-xs text-gray-400">---</span>
+                    </div>
+                    <div class="text-center bg-black/60 rounded-xl p-4 border border-mmcBorder">
+                        <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Puntaje Final Obtenido</span>
+                        <span id="taolu-selected-score" class="font-mono text-4xl font-black text-mmcGold">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listado de Deportistas Divididos por Grupos / Formas -->
+            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-mmcBorder">
+                    <div>
+                        <h3 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-person-swimming text-mmcGold mr-2"></i> Taolu - Órdenes de Salida por Grupos</h3>
+                        <p class="text-xs text-gray-400 mt-1">Deportistas organizados por categoría y forma a realizar</p>
+                    </div>
+                    <div id="taolu-groups-filters" class="flex flex-wrap gap-2">
+                        <!-- Filtros de grupos dinámicos -->
+                    </div>
+                </div>
+
+                <div id="taolu-groups-container" class="space-y-6">
+                    <!-- Se inyectarán los grupos y sus tablas aquí -->
+                </div>
             </div>
         </section>
 
         <!-- Vista 4: MEDALLERO -->
         <section id="view-medallero" class="view-section hidden space-y-6">
             <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6">
-                <h3 class="text-xl font-bold text-white uppercase mb-4">Medallero por Escuelas</h3>
+                <h3 class="text-xl font-bold text-white uppercase mb-4"><i class="fa-solid fa-trophy text-mmcGold mr-2"></i> Medallero por Escuelas</h3>
                 <div id="medallero-table-container" class="overflow-x-auto">
                     <!-- Dinámico -->
                 </div>
