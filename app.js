@@ -196,10 +196,11 @@ function filterSandaCategory(categoryName) {
 
         const ordenLlave = llaveId.includes('/') ? llaveId.split('/')[1] : llaveId;
 
+        // Tomando Nombre_Escuela de la hoja Sanda
         const redObj = {
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
             siglas: r.Siglas || r.siglas || "MMC",
-            inst: r.Institucion || r.institucion || "Master Martial Combat",
+            inst: r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat",
             photo: convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
             logo: convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "")
         };
@@ -207,7 +208,7 @@ function filterSandaCategory(categoryName) {
         const blueObj = {
             name: b.Nombre_Completo || b.nombre_completo || "Esquina Azul",
             siglas: b.Siglas || b.siglas || "UPCH",
-            inst: b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
+            inst: b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
             photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
             logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
         };
@@ -244,13 +245,13 @@ function filterSandaCategory(categoryName) {
         selectSandaMatch({
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
             siglas: r.Siglas || r.siglas || "MMC",
-            inst: r.Institucion || r.institucion || "Master Martial Combat",
+            inst: r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat",
             photo: convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
             logo: convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "")
         }, {
             name: b.Nombre_Completo || b.nombre_completo || "Esquina Azul",
             siglas: b.Siglas || b.siglas || "UPCH",
-            inst: b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
+            inst: b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
             photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
             logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
         }, firstKey);
@@ -290,13 +291,13 @@ function selectSandaMatch(red, blue, llaveId) {
     updateRoundCirclesFromSheets();
 }
 
-// Sincronizar ganadores de round desde la hoja Llaves_Sanda
+// Sincronizar ganadores y puntajes reales desde la hoja Llaves_Sanda
 async function syncMatchData() {
     try {
         const res = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
         llavesSandaData = await res.json();
         updateRoundCirclesFromSheets();
-        alert("¡Datos de rounds actualizados desde Google Sheets!");
+        alert("¡Datos y puntajes de rounds actualizados desde Google Sheets!");
     } catch (e) {
         console.error("Error al sincronizar datos:", e);
     }
@@ -306,22 +307,31 @@ function updateRoundCirclesFromSheets() {
     if (!currentActiveLlave) return;
     const llaveRow = llavesSandaData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda) === currentActiveLlave);
 
-    const r1 = llaveRow ? (llaveRow.Round1 || llaveRow.round1 || "-") : "-";
-    const r2 = llaveRow ? (llaveRow.Round2 || llaveRow.round2 || "-") : "-";
-    const r3 = llaveRow ? (llaveRow.Round3 || llaveRow.round3 || "-") : "-";
+    const r1Winner = llaveRow ? (llaveRow.Round1 || llaveRow.round1 || "-") : "-";
+    const r2Winner = llaveRow ? (llaveRow.Round2 || llaveRow.round2 || "-") : "-";
+    const r3Winner = llaveRow ? (llaveRow.Round3 || llaveRow.round3 || "-") : "-";
 
-    applyRoundCircleStyle(1, r1);
-    applyRoundCircleStyle(2, r2);
-    applyRoundCircleStyle(3, r3);
+    const r1RedScore = llaveRow ? (llaveRow.ROJO_Round1 || llaveRow.rojo_round1 || "0") : "0";
+    const r1BlueScore = llaveRow ? (llaveRow.AZUL_Round1 || llaveRow.azul_round1 || "0") : "0";
+
+    const r2RedScore = llaveRow ? (llaveRow.ROJO_Round2 || llaveRow.rojo_round2 || "0") : "0";
+    const r2BlueScore = llaveRow ? (llaveRow.AZUL_Round2 || llaveRow.azul_round2 || "0") : "0";
+
+    const r3RedScore = llaveRow ? (llaveRow.ROJO_Round3 || llaveRow.rojo_round3 || "0") : "0";
+    const r3BlueScore = llaveRow ? (llaveRow.AZUL_Round3 || llaveRow.azul_round3 || "0") : "0";
+
+    applyRoundCircleStyle(1, r1Winner, `${r1RedScore} / ${r1BlueScore}`);
+    applyRoundCircleStyle(2, r2Winner, `${r2RedScore} / ${r2BlueScore}`);
+    applyRoundCircleStyle(3, r3Winner, `${r3RedScore} / ${r3BlueScore}`);
 }
 
-function applyRoundCircleStyle(roundNum, winnerColor) {
+function applyRoundCircleStyle(roundNum, winnerColor, scoreText) {
     const circle = document.getElementById(`round-circle-${roundNum}`);
     const scoreLabel = document.getElementById(`round-score-${roundNum}`);
     if (!circle || !scoreLabel) return;
 
-    // Formato de puntaje debajo del círculo ([Puntaje_Rojo] / [Puntaje_Azul])
-    scoreLabel.innerText = "10 / 9";
+    // Mostrar puntajes reales de las columnas del excel (ROJO_RoundX / AZUL_RoundX)
+    scoreLabel.innerText = scoreText;
 
     if (winnerColor === "ROJO") {
         circle.className = "w-3.5 h-3.5 rounded-full bg-red-600 shadow-md ring-2 ring-red-500/50";
