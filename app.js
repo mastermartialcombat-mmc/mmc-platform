@@ -1,8 +1,13 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Asegúrate de conservar tu URL real de Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Recuerda mantener tu URL real de Apps Script
 const LOGO_DRIVE_URL = "https://drive.google.com/file/d/1EM8MEbYssMssn1NKQfAIqA6n3Fvr1Zrb/view?usp=drive_link";
+
+// Enlaces de fondo proporcionados para las esquinas (convertidos automáticamente)
+const FONDO_ROJA_URL = "https://drive.google.com/file/d/19XJR7ZobDCXDTe8S3Dsq3EF50emXlz_Q/view?usp=drive_link";
+const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3LHiO8tFjV/view?usp=drive_link";
 
 let championshipData = [];
 let sandaData = [];
+let llavesSandaData = [];
 let taoluData = [];
 let medalleroData = [];
 
@@ -18,6 +23,18 @@ function convertToDirectDriveUrl(url) {
 document.addEventListener('DOMContentLoaded', () => {
     const logoImg = document.getElementById('nav-logo');
     if (logoImg) logoImg.src = convertToDirectDriveUrl(LOGO_DRIVE_URL);
+
+    // Aplicar fondos de esquina directamente en las tarjetas de Sanshou
+    const cardRoja = document.getElementById('card-esquina-roja');
+    if (cardRoja) {
+        cardRoja.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_ROJA_URL)}')`;
+    }
+
+    const cardAzul = document.getElementById('card-esquina-azul');
+    if (cardAzul) {
+        cardAzul.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_AZUL_URL)}')`;
+    }
+
     loadAllData();
 });
 
@@ -54,7 +71,11 @@ async function loadAllData() {
 
         const resSanda = await fetch(`${API_URL}?sheet=Sanda`);
         sandaData = await resSanda.json();
-        initSandaModule(sandaData);
+
+        const resLlaves = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
+        llavesSandaData = await resLlaves.json();
+
+        initSandaModule(sandaData, llavesSandaData);
 
         const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
         taoluData = await resTaolu.json();
@@ -102,7 +123,7 @@ function renderChampionships(data) {
 }
 
 // ==========================================
-// MÓDULO SANSHOU (MARCADOR GRANDE + LOGOS)
+// MÓDULO SANSHOU
 // ==========================================
 let currentMatchLevel = "AVANZADO"; 
 let timerInterval = null;
@@ -110,7 +131,7 @@ let secondsLeft = 120;
 let currentRound = 1;
 let isResting = false;
 
-function initSandaModule(data) {
+function initSandaModule(data, llavesData) {
     const filtersContainer = document.getElementById('sanda-category-filters');
     if (!filtersContainer) return;
 
@@ -178,6 +199,8 @@ function filterSandaCategory(categoryName) {
         const r = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0];
         const b = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || fighters[1] || {};
 
+        const ordenLlave = llaveId.includes('/') ? llaveId.split('/')[1] : llaveId;
+
         const redObj = {
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
             siglas: r.Siglas || r.siglas || "MMC",
@@ -195,9 +218,9 @@ function filterSandaCategory(categoryName) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(ordenLlave)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
                 <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                    <span>Llave: ${llaveId}</span>
+                    <span>LLAVE: ${ordenLlave}</span>
                     <span class="text-mmcGold">${categoryName}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-center text-xs">
@@ -218,9 +241,11 @@ function filterSandaCategory(categoryName) {
     }).join('');
 
     if (Object.keys(pairs).length > 0) {
-        const firstPair = Object.values(pairs)[0];
+        const firstKey = Object.keys(pairs)[0];
+        const firstPair = pairs[firstKey];
         const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0];
         const b = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || firstPair[1] || {};
+        const ordenFirst = firstKey.includes('/') ? firstKey.split('/')[1] : firstKey;
 
         selectSandaMatch({
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
@@ -234,19 +259,19 @@ function filterSandaCategory(categoryName) {
             inst: b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
             photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
             logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
-        });
+        }, ordenFirst);
     }
 }
 
-function selectSandaMatch(red, blue) {
-    // Esquina Roja
+function selectSandaMatch(red, blue, ordenLlave) {
     document.getElementById('sanda-red-fullname').innerText = red.name;
     document.getElementById('sanda-red-siglas').innerText = red.siglas;
     document.getElementById('sanda-red-inst').innerText = red.inst;
 
+    // Foto centrada con el borde superior alineado al contenedor
     const redPhotoBox = document.getElementById('sanda-red-photo-container');
     if (redPhotoBox) {
-        redPhotoBox.innerHTML = red.photo ? `<img src="${red.photo}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-6xl text-gray-700 absolute inset-0 m-auto w-fit h-fit"></i>`;
+        redPhotoBox.innerHTML = red.photo ? `<img src="${red.photo}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>`;
     }
 
     const redSchoolLogo = document.getElementById('sanda-red-school-logo');
@@ -254,23 +279,26 @@ function selectSandaMatch(red, blue) {
         redSchoolLogo.innerHTML = red.logo ? `<img src="${red.logo}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
     }
 
-    // Esquina Azul
     document.getElementById('sanda-blue-fullname').innerText = blue.name;
     document.getElementById('sanda-blue-siglas').innerText = blue.siglas;
     document.getElementById('sanda-blue-inst').innerText = blue.inst;
 
     const bluePhotoBox = document.getElementById('sanda-blue-photo-container');
     if (bluePhotoBox) {
-        bluePhotoBox.innerHTML = blue.photo ? `<img src="${blue.photo}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-6xl text-gray-700 absolute inset-0 m-auto w-fit h-fit"></i>`;
+        bluePhotoBox.innerHTML = blue.photo ? `<img src="${blue.photo}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>`;
     }
 
     const blueSchoolLogo = document.getElementById('sanda-blue-school-logo');
     if (blueSchoolLogo) {
         blueSchoolLogo.innerHTML = blue.logo ? `<img src="${blue.logo}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
     }
+
+    if (ordenLlave) {
+        console.log(`Combate cargado: Llave ${ordenLlave}`);
+    }
 }
 
-// Cronómetro de Sanda (Novel = 1:30, Avanzado = 2:00, Descanso = 1:00)
+// Cronómetro
 function toggleTimer() {
     const btn = document.getElementById('timer-btn');
     if (timerInterval) {

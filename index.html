@@ -73,7 +73,7 @@
             </div>
         </section>
 
-        <!-- Vista 2: SANSHOU (Con Diseño exacto al Mockup) -->
+        <!-- Vista 2: SANSHOU -->
         <section id="view-sanda" class="view-section hidden space-y-6">
             <div class="bg-mmcCard border border-mmcBorder rounded-xl p-4 flex flex-wrap justify-between items-center gap-4">
                 <h3 class="text-sm font-bold text-white uppercase"><i class="fa-solid fa-filter text-mmcGold mr-2"></i> Categorías de Combate</h3>
@@ -89,32 +89,33 @@
                 </div>
             </div>
 
-            <!-- MARCADOR PRINCIPAL TIPO MOCKUP -->
+            <!-- MARCADOR PRINCIPAL CON FONDOS DE ESQUINA Y FOTOS ALINEADAS ARRIBA -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
                 
-                <!-- Tarjeta Esquina Roja (Peleador Grande) -->
-                <div class="lg:col-span-4 bg-slate-900 border-2 border-red-600/50 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative">
-                    <!-- Foto Grande arriba -->
-                    <div id="sanda-red-photo-container" class="w-full h-64 md:h-72 bg-slate-950 overflow-hidden relative border-b border-red-600/30">
-                        <i class="fa-solid fa-user text-6xl text-gray-700 absolute inset-0 m-auto w-fit h-fit"></i>
+                <!-- Esquina Roja (Fondo aplicado con cover y overlay) -->
+                <div id="card-esquina-roja" class="lg:col-span-4 border-2 border-red-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-red-950/70 to-black/90 z-0"></div>
+                    
+                    <!-- Contenedor Foto (Alineada arriba, bajando si es muy alta) -->
+                    <div id="sanda-red-photo-container" class="w-full h-64 md:h-72 overflow-hidden relative border-b border-red-600/30 z-10 flex justify-center">
+                        <i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>
                     </div>
 
                     <!-- Datos y Universidad abajo -->
-                    <div class="p-4 space-y-2 bg-gradient-to-b from-slate-900 to-red-950/40 flex-grow flex flex-col justify-between">
+                    <div class="p-4 space-y-2 relative z-10 flex-grow flex flex-col justify-between">
                         <div>
                             <h4 id="sanda-red-fullname" class="font-black text-lg text-white leading-tight">MARYCIELO MATÍAS CUBA</h4>
                             <div class="flex items-center space-x-2.5 mt-2">
-                                <div id="sanda-red-school-logo" class="w-7 h-7 rounded-full bg-slate-800 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                <div id="sanda-red-school-logo" class="w-7 h-7 rounded-full bg-slate-900 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center">
                                     <i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>
                                 </div>
                                 <div class="text-xs leading-tight">
                                     <span id="sanda-red-siglas" class="font-extrabold text-white block">PUCP</span>
-                                    <span id="sanda-red-inst" class="text-[10px] text-gray-400 block truncate max-w-[180px]">Pontificia Universidad Católica del Perú</span>
+                                    <span id="sanda-red-inst" class="text-[10px] text-gray-300 block truncate max-w-[180px]">Pontificia Universidad Católica del Perú</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Botón Esquina Roja -->
                         <div class="pt-2">
                             <span class="w-full block text-center bg-red-600 text-white font-black py-2 rounded-xl text-xs uppercase tracking-widest shadow-lg border border-red-400">
                                 ESQUINA ROJA
@@ -123,24 +124,21 @@
                     </div>
                 </div>
 
-                <!-- Marcador Central (Cronómetro y Reglas) -->
-                <div class="lg:col-span-4 bg-slate-900/90 border border-mmcBorder rounded-2xl p-6 flex flex-col items-center justify-between text-center space-y-4 shadow-2xl">
+                <!-- Marcador Central -->
+                <div class="lg:col-span-4 bg-slate-900/95 border border-mmcBorder rounded-2xl p-6 flex flex-col items-center justify-between text-center space-y-4 shadow-2xl">
                     <div>
                         <span id="sanda-round-title" class="text-xs font-black text-gray-300 uppercase tracking-widest">ASALTO 1 / 3</span>
                         <h5 id="sanda-level-badge" class="text-[10px] text-mmcGold uppercase font-extrabold tracking-wider mt-0.5">Nivel Avanzado (2:00 min)</h5>
                     </div>
 
-                    <!-- Reloj Digital Prominente -->
                     <span id="sanda-timer" class="font-mono text-6xl md:text-7xl font-black text-white tracking-tight">02:00</span>
 
-                    <!-- Botón de Control Circular Estilo Mockup -->
                     <div class="flex items-center justify-center space-x-3">
                         <button onclick="toggleTimer()" id="timer-btn" class="w-14 h-14 bg-mmcGold hover:bg-yellow-500 text-black rounded-full flex items-center justify-center text-xl shadow-xl transition transform active:scale-95">
                             <i class="fa-solid fa-play"></i>
                         </button>
                     </div>
 
-                    <!-- Indicadores de Asaltos y Reglas -->
                     <div class="space-y-2 w-full pt-2 border-t border-slate-800">
                         <div class="flex items-center justify-center space-x-2">
                             <div id="round-dot-1" class="w-3.5 h-3.5 rounded-full bg-red-500 ring-2 ring-red-400"></div>
@@ -151,7 +149,6 @@
                         <span class="text-[10px] text-gray-500 block">(2 o 3 asaltos)</span>
                     </div>
 
-                    <!-- Controles Manuales -->
                     <div class="flex justify-center space-x-2 pt-1">
                         <button onclick="nextRound()" class="bg-slate-800 hover:bg-slate-700 text-mmcGold px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border border-mmcBorder">
                             Descanso / Sig. Asalto
@@ -162,29 +159,30 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta Esquina Azul (Peleador Grande) -->
-                <div class="lg:col-span-4 bg-slate-900 border-2 border-blue-600/50 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative">
-                    <!-- Foto Grande arriba -->
-                    <div id="sanda-blue-photo-container" class="w-full h-64 md:h-72 bg-slate-950 overflow-hidden relative border-b border-blue-600/30">
-                        <i class="fa-solid fa-user text-6xl text-gray-700 absolute inset-0 m-auto w-fit h-fit"></i>
+                <!-- Esquina Azul (Fondo aplicado con cover y overlay) -->
+                <div id="card-esquina-azul" class="lg:col-span-4 border-2 border-blue-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-blue-950/70 to-black/90 z-0"></div>
+
+                    <!-- Contenedor Foto (Alineada arriba, bajando si es muy alta) -->
+                    <div id="sanda-blue-photo-container" class="w-full h-64 md:h-72 overflow-hidden relative border-b border-blue-600/30 z-10 flex justify-center">
+                        <i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>
                     </div>
 
                     <!-- Datos y Universidad abajo -->
-                    <div class="p-4 space-y-2 bg-gradient-to-b from-slate-900 to-blue-950/40 flex-grow flex flex-col justify-between">
+                    <div class="p-4 space-y-2 relative z-10 flex-grow flex flex-col justify-between">
                         <div>
                             <h4 id="sanda-blue-fullname" class="font-black text-lg text-white leading-tight">SANDRA VERONICA CALIXTO</h4>
                             <div class="flex items-center space-x-2.5 mt-2">
-                                <div id="sanda-blue-school-logo" class="w-7 h-7 rounded-full bg-slate-800 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                <div id="sanda-blue-school-logo" class="w-7 h-7 rounded-full bg-slate-900 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center">
                                     <i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>
                                 </div>
                                 <div class="text-xs leading-tight">
                                     <span id="sanda-blue-siglas" class="font-extrabold text-white block">UPCH</span>
-                                    <span id="sanda-blue-inst" class="text-[10px] text-gray-400 block truncate max-w-[180px]">Universidad Peruana Cayetano Heredia</span>
+                                    <span id="sanda-blue-inst" class="text-[10px] text-gray-300 block truncate max-w-[180px]">Universidad Peruana Cayetano Heredia</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Botón Esquina Azul -->
                         <div class="pt-2">
                             <span class="w-full block text-center bg-blue-600 text-white font-black py-2 rounded-xl text-xs uppercase tracking-widest shadow-lg border border-blue-400">
                                 ESQUINA AZUL
