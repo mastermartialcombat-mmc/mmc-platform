@@ -41,7 +41,7 @@
 
             <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
                 <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-mmcGold bg-mmcBorder/50 transition"><i class="fa-solid fa-house mr-2"></i>Inicio</button>
-                <button onclick="switchView('sanda')" id="nav-sanda" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-hand-fist mr-2"></i>Sanshou</button>
+                <button onclick="switchView('sanda')" id="nav-sanda" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-mitten mr-2"></i>Sanshou</button>
                 <button onclick="switchView('taolu')" id="nav-taolu" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-person-swimming mr-2"></i>Taolu</button>
                 <button onclick="switchView('medallero')" id="nav-medallero" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-trophy mr-2"></i>Medallero</button>
             </nav>
@@ -225,12 +225,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Listado de Peleas por Categoría -->
-            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-4">
-                <h3 class="text-lg font-bold text-white uppercase"><i class="fa-solid fa-list text-mmcGold mr-2"></i> Seleccionar Combate de la Categoría</h3>
-                <div id="sanda-matches-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </div>
         </section>
 
         <!-- Vista 3: TAOLU -->
@@ -278,7 +272,7 @@
 
     <nav class="md:hidden bg-mmcCard border-t border-mmcBorder fixed bottom-0 left-0 right-0 z-50 flex justify-around py-3 text-xs shadow-lg">
         <button onclick="switchView('home')" id="mob-home" class="mob-btn flex flex-col items-center text-mmcGold font-bold"><i class="fa-solid fa-house text-lg mb-1"></i>Inicio</button>
-        <button onclick="switchView('sanda')" id="mob-sanda" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-hand-fist text-lg mb-1"></i>Sanshou</button>
+        <button onclick="switchView('sanda')" id="mob-sanda" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-mitten text-lg mb-1"></i>Sanshou</button>
         <button onclick="switchView('taolu')" id="mob-taolu" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-person-swimming text-lg mb-1"></i>Taolu</button>
         <button onclick="switchView('medallero')" id="mob-medallero" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-trophy text-lg mb-1"></i>Medallero</button>
     </nav>

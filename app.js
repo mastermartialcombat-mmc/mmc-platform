@@ -179,15 +179,46 @@ function filterSandaCategory(categoryName) {
     resetTimer();
 
     renderTournamentBracketsTree(filtered, llavesSandaData);
-    renderMatchesList(filtered);
+    
+    // Seleccionar por defecto la primera llave disponible en el marcador superior
+    if (filtered.length > 0) {
+        const pairs = {};
+        filtered.forEach(row => {
+            const llave = row.ID_Llave || row.id_llave || "P01";
+            if (!pairs[llave]) pairs[llave] = [];
+            pairs[llave].push(row);
+        });
+        const firstKey = Object.keys(pairs)[0];
+        if (firstKey) {
+            const firstPair = pairs[firstKey];
+            const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0] || {};
+            const b = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || firstPair[1] || {};
+            
+            const redDni = (r.DNI_Participante || r.dni_participante || "").toString().trim();
+            const blueDni = (b.DNI_Participante || b.dni_participante || "").toString().trim();
+
+            selectSandaMatch({
+                name: redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Por definir"),
+                siglas: redDni ? (r.Siglas || r.siglas || "MMC") : "",
+                inst: redDni ? (r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat") : "",
+                photo: redDni ? convertToDirectDriveUrl(r.URL_Foto || r.url_foto || "") : "",
+                logo: redDni ? convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "") : ""
+            }, {
+                name: blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Por definir"),
+                siglas: blueDni ? (b.Siglas || b.siglas || "UPCH") : "",
+                inst: blueDni ? (b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia") : "",
+                photo: blueDni ? convertToDirectDriveUrl(b.URL_Foto || b.url_foto || "") : "",
+                logo: blueDni ? convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "") : ""
+            }, firstKey);
+        }
+    }
 }
 
-// Renderizar Árbol de Llaves basándose en Orden_de_Final y Ganador_a_Ingresar
+// Renderizar Árbol de Llaves con Fases Dinámicas, Insignias de Medallas y Fondo Claro
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
 
-    // Agrupar peleadores de la categoría por ID_Llave
     const pairs = {};
     filteredFighters.forEach(row => {
         const llave = row.ID_Llave || row.id_llave || "P01";
@@ -201,7 +232,6 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         return;
     }
 
-    // Mapear cada llave con su Orden_de_Final registrado en la hoja Llaves_Sanda
     const phaseOrderMap = {
         "DIECISEISAVOS DE FINAL": 1,
         "OCTAVOS DE FINAL": 2,
@@ -216,7 +246,6 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const llaveRow = llavesData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda || row.ID_Llave) === llaveId);
         let phaseName = llaveRow ? (llaveRow.Orden_de_Final || llaveRow.orden_de_final || "").trim().toUpperCase() : "";
 
-        // Si no se encuentra un Orden_de_Final explícito, asignar por defecto segun la cantidad de llaves
         if (!phaseName) {
             if (llaveKeys.length >= 8) phaseName = "OCTAVOS DE FINAL";
             else if (llaveKeys.length >= 4) phaseName = "CUARTOS DE FINAL";
@@ -228,7 +257,6 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         groupedPhases[phaseName].push(llaveId);
     });
 
-    // Ordenar únicamente las fases que sí tienen llaves registradas
     const activePhaseNames = Object.keys(groupedPhases).sort((a, b) => {
         const orderA = phaseOrderMap[a] || 99;
         const orderB = phaseOrderMap[b] || 99;
@@ -244,16 +272,21 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const estadoLlave = llaveRow ? (llaveRow.Estado || llaveRow.estado || "Pendiente") : "Pendiente";
         const ganadorOficial = llaveRow ? (llaveRow.Ganador || llaveRow.ganador || "").toUpperCase() : "";
 
-        // Validar si hay DNI_Participante registrado
         const redDni = (r.DNI_Participante || r.dni_participante || "").toString().trim();
         const blueDni = (b.DNI_Participante || b.dni_participante || "").toString().trim();
 
-        // Determinar el nombre a mostrar (Nombre_Completo o Ganador_a_Ingresar)
         const redName = redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Ganador de llave previa");
         const blueName = blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Ganador de llave previa");
 
         const redClass = redDni ? (ganadorOficial === "AZUL" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
         const blueClass = blueDni ? (ganadorOficial === "ROJO" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
+
+        // Obtener Puesto y Medalla si aplica
+        const redPuesto = redDni ? (r.Puesto_Nombre || r.puesto_nombre || "").trim() : "";
+        const redMedallaUrl = redDni ? convertToDirectDriveUrl(r.Puesto_URL || r.puesto_url || "") : "";
+
+        const bluePuesto = blueDni ? (b.Puesto_Nombre || b.puesto_nombre || "").trim() : "";
+        const blueMedallaUrl = blueDni ? convertToDirectDriveUrl(b.Puesto_URL || b.puesto_url || "") : "";
 
         const redObj = {
             name: redDni ? redName : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Por definir"),
@@ -272,26 +305,31 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-xl transition w-[260px] flex-shrink-0 my-3">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-xl transition w-[270px] flex-shrink-0 my-3">
                 <div class="bg-slate-900 px-3 py-1.5 flex justify-between items-center border-b border-slate-700">
                     <span class="bg-slate-800 text-white font-mono text-xs font-black px-2.5 py-0.5 rounded border border-slate-600">${llaveId}</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded ${estadoLlave.toUpperCase() === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
                 <div class="p-3 space-y-2">
                     <div class="flex justify-between items-center bg-red-50 px-3 py-2 rounded border-l-4 border-red-600 shadow-sm">
-                        <span class="text-xs truncate max-w-[170px] ${redClass}">${redName}</span>
-                        <span class="text-[9px] font-black text-red-600">ROJO</span>
+                        <div class="flex items-center space-x-1.5 overflow-hidden">
+                            <span class="text-xs truncate max-w-[140px] ${redClass}" title="${redName}">${redName}</span>
+                            ${redMedallaUrl ? `<img src="${redMedallaUrl}" alt="${redPuesto}" class="w-5 h-5 object-contain flex-shrink-0 drop-shadow" title="${redPuesto}">` : ''}
+                        </div>
+                        <span class="text-[9px] font-black text-red-600 flex-shrink-0 ml-1">ROJO</span>
                     </div>
                     <div class="flex justify-between items-center bg-blue-50 px-3 py-2 rounded border-l-4 border-blue-600 shadow-sm">
-                        <span class="text-xs truncate max-w-[170px] ${blueClass}">${blueName}</span>
-                        <span class="text-[9px] font-black text-blue-600">AZUL</span>
+                        <div class="flex items-center space-x-1.5 overflow-hidden">
+                            <span class="text-xs truncate max-w-[140px] ${blueClass}" title="${blueName}">${blueName}</span>
+                            ${blueMedallaUrl ? `<img src="${blueMedallaUrl}" alt="${bluePuesto}" class="w-5 h-5 object-contain flex-shrink-0 drop-shadow" title="${bluePuesto}">` : ''}
+                        </div>
+                        <span class="text-[9px] font-black text-blue-600 flex-shrink-0 ml-1">AZUL</span>
                     </div>
                 </div>
             </div>
         `;
     };
 
-    // Generar la estructura gráfica dinámica por fases con conectores SVG
     container.innerHTML = activePhaseNames.map((phaseName, pIdx) => `
         <div class="flex flex-col items-center space-y-4">
             <span class="text-[11px] font-black text-slate-800 uppercase tracking-widest bg-slate-200/80 px-3 py-1 rounded-md border border-slate-300 shadow-sm">${phaseName}</span>
@@ -308,83 +346,6 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
             </div>
         ` : ''}
     `).join('');
-}
-
-function renderMatchesList(filtered) {
-    const matchesContainer = document.getElementById('sanda-matches-list');
-    if (!matchesContainer) return;
-
-    const pairs = {};
-    filtered.forEach(row => {
-        const llave = row.ID_Llave || row.id_llave || "Combate 1";
-        if (!pairs[llave]) pairs[llave] = [];
-        pairs[llave].push(row);
-    });
-
-    matchesContainer.innerHTML = Object.keys(pairs).map(llaveId => {
-        const fighters = pairs[llaveId];
-        const r = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0] || {};
-        const b = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || fighters[1] || {};
-
-        const redObj = {
-            name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
-            siglas: r.Siglas || r.siglas || "MMC",
-            inst: r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat",
-            photo: convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
-            logo: convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "")
-        };
-
-        const blueObj = {
-            name: b.Nombre_Completo || b.nombre_completo || "Esquina Azul",
-            siglas: b.Siglas || b.siglas || "UPCH",
-            inst: b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
-            photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
-            logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
-        };
-
-        return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
-                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                    <span>LLAVE: ${llaveId}</span>
-                    <span class="text-mmcGold">${currentCategoryFiltered}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-center text-xs">
-                    <div class="bg-red-950/30 p-2 rounded border border-red-600/20 truncate">
-                        <span class="text-red-400 font-bold block text-[9px]">ROJO</span>
-                        <span class="text-white font-semibold truncate block">${redObj.name}</span>
-                    </div>
-                    <div class="bg-blue-950/30 p-2 rounded border border-blue-600/20 truncate">
-                        <span class="text-blue-400 font-bold block text-[9px]">AZUL</span>
-                        <span class="text-white font-semibold truncate block">${blueObj.name}</span>
-                    </div>
-                </div>
-                <button class="w-full bg-slate-800 hover:bg-slate-700 text-mmcGold text-[11px] font-bold py-1.5 rounded uppercase transition">
-                    Cargar en Marcador En Vivo
-                </button>
-            </div>
-        `;
-    }).join('');
-
-    if (Object.keys(pairs).length > 0) {
-        const firstKey = Object.keys(pairs)[0];
-        const firstPair = pairs[firstKey];
-        const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0] || {};
-        const b = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || firstPair[1] || {};
-
-        selectSandaMatch({
-            name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
-            siglas: r.Siglas || r.siglas || "MMC",
-            inst: r.Nombre_Escuela || r.nombre_escuela || r.Institucion || r.institucion || "Master Martial Combat",
-            photo: convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
-            logo: convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "")
-        }, {
-            name: b.Nombre_Completo || b.nombre_completo || "Esquina Azul",
-            siglas: b.Siglas || b.siglas || "UPCH",
-            inst: b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
-            photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
-            logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
-        }, firstKey);
-    }
 }
 
 function selectSandaMatch(red, blue, llaveId) {
