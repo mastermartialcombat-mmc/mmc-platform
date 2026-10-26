@@ -202,20 +202,22 @@
 
             </div>
 
-            <!-- SECCIÓN DE LLAVES ESTILO TORNEO OFICIAL -->
+            <!-- SECCIÓN DE ÁRBOL DE LLAVES (BRACKET CON LÍNEAS CONECTORAS) -->
             <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-6">
                 <!-- Subtítulo de Categoría Completo -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-mmcBorder">
                     <div>
                         <h3 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-sitemap text-mmcGold mr-2"></i> Llaves de Eliminación - Torneo Oficial</h3>
-                        <p id="bracket-subtitle-info" class="text-xs text-gray-400 mt-1">Eliminación directa por categorías</p>
+                        <p id="bracket-subtitle-info" class="text-xs text-gray-400 mt-1">Estructura de llaves y árbol de eliminación directa</p>
                     </div>
                     <span id="bracket-category-title" class="bg-slate-800 text-mmcGold text-xs font-black px-4 py-2 rounded-lg border border-mmcBorder uppercase shadow">---</span>
                 </div>
                 
-                <!-- Contenedor Estilo Bracket de Cuadro Oscuro -->
-                <div id="tournament-brackets-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Se genera dinámicamente con las llaves completas -->
+                <!-- Contenedor con Scroll Horizontal fluido para el Árbol de Llaves con líneas -->
+                <div class="overflow-x-auto py-6">
+                    <div id="tournament-brackets-container" class="min-w-[950px] flex items-center justify-between gap-6 px-4">
+                        <!-- El árbol completo con columnas y conectores se generará aquí -->
+                    </div>
                 </div>
             </div>
 
