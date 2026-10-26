@@ -9,7 +9,7 @@ let sandaData = [];
 let llavesSandaData = [];
 let taoluData = [];
 let medalleroData = [];
-let roundWinners = { 1: null, 2: null, 3: null };
+let currentActiveLlave = null;
 
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
@@ -213,7 +213,7 @@ function filterSandaCategory(categoryName) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(ordenLlave)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
                 <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
                     <span>LLAVE: ${ordenLlave}</span>
                     <span class="text-mmcGold">${categoryName}</span>
@@ -240,7 +240,6 @@ function filterSandaCategory(categoryName) {
         const firstPair = pairs[firstKey];
         const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0];
         const b = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || firstPair[1] || {};
-        const ordenFirst = firstKey.includes('/') ? firstKey.split('/')[1] : firstKey;
 
         selectSandaMatch({
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
@@ -254,11 +253,12 @@ function filterSandaCategory(categoryName) {
             inst: b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia",
             photo: convertToDirectDriveUrl(b.URL_Foto || b.url_foto || ""),
             logo: convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "")
-        }, ordenFirst);
+        }, firstKey);
     }
 }
 
-function selectSandaMatch(red, blue, ordenLlave) {
+function selectSandaMatch(red, blue, llaveId) {
+    currentActiveLlave = llaveId;
     document.getElementById('sanda-red-fullname').innerText = red.name;
     document.getElementById('sanda-red-siglas').innerText = red.siglas;
     document.getElementById('sanda-red-inst').innerText = red.inst;
@@ -286,35 +286,50 @@ function selectSandaMatch(red, blue, ordenLlave) {
     if (blueSchoolLogo) {
         blueSchoolLogo.innerHTML = blue.logo ? `<img src="${blue.logo}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
     }
+
+    updateRoundCirclesFromSheets();
 }
 
-// Modal de Ganador por Round
-function openRoundWinnerModal() {
-    document.getElementById('modal-round-tag').innerText = `ASALTO ${currentRound}`;
-    document.getElementById('round-winner-modal').classList.remove('hidden');
-}
-
-function closeRoundWinnerModal() {
-    document.getElementById('round-winner-modal').classList.add('hidden');
-}
-
-function setRoundWinner(color) {
-    roundWinners[currentRound] = color;
-    const box = document.getElementById(`round-box-${currentRound}`);
-    const winnerLabel = document.getElementById(`round-winner-${currentRound}`);
-
-    if (box && winnerLabel) {
-        if (color === 'ROJO') {
-            box.className = "w-8 h-8 rounded-full border-2 border-red-500 bg-red-600 text-white flex items-center justify-center font-bold text-xs shadow";
-            winnerLabel.innerText = "GANÓ ROJO";
-            winnerLabel.className = "text-[9px] font-extrabold text-red-400";
-        } else {
-            box.className = "w-8 h-8 rounded-full border-2 border-blue-500 bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow";
-            winnerLabel.innerText = "GANÓ AZUL";
-            winnerLabel.className = "text-[9px] font-extrabold text-blue-400";
-        }
+// Sincronizar ganadores de round desde la hoja Llaves_Sanda
+async function syncMatchData() {
+    try {
+        const res = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
+        llavesSandaData = await res.json();
+        updateRoundCirclesFromSheets();
+        alert("¡Datos de rounds actualizados desde Google Sheets!");
+    } catch (e) {
+        console.error("Error al sincronizar datos:", e);
     }
-    closeRoundWinnerModal();
+}
+
+function updateRoundCirclesFromSheets() {
+    if (!currentActiveLlave) return;
+    const llaveRow = llavesSandaData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda) === currentActiveLlave);
+
+    const r1 = llaveRow ? (llaveRow.Round1 || llaveRow.round1 || "-") : "-";
+    const r2 = llaveRow ? (llaveRow.Round2 || llaveRow.round2 || "-") : "-";
+    const r3 = llaveRow ? (llaveRow.Round3 || llaveRow.round3 || "-") : "-";
+
+    applyRoundCircleStyle(1, r1);
+    applyRoundCircleStyle(2, r2);
+    applyRoundCircleStyle(3, r3);
+}
+
+function applyRoundCircleStyle(roundNum, winnerColor) {
+    const circle = document.getElementById(`round-circle-${roundNum}`);
+    const scoreLabel = document.getElementById(`round-score-${roundNum}`);
+    if (!circle || !scoreLabel) return;
+
+    // Formato de puntaje debajo del círculo ([Puntaje_Rojo] / [Puntaje_Azul])
+    scoreLabel.innerText = "10 / 9";
+
+    if (winnerColor === "ROJO") {
+        circle.className = "w-3.5 h-3.5 rounded-full bg-red-600 shadow-md ring-2 ring-red-500/50";
+    } else if (winnerColor === "AZUL") {
+        circle.className = "w-3.5 h-3.5 rounded-full bg-blue-600 shadow-md ring-2 ring-blue-500/50";
+    } else {
+        circle.className = "w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-800 shadow-inner";
+    }
 }
 
 // Cronómetro
@@ -374,23 +389,11 @@ function resetTimer() {
     isResting = false;
     currentRound = 1;
     secondsLeft = currentMatchLevel === "NOVEL" ? 90 : 120;
-    roundWinners = { 1: null, 2: null, 3: null };
     
     document.getElementById('sanda-round-title').innerText = `ASALTO 1 / 3`;
     document.getElementById('sanda-level-badge').innerText = `Nivel ${currentMatchLevel} (${currentMatchLevel === "NOVEL" ? "1:30" : "2:00"} min)`;
     
-    for(let i=1; i<=3; i++) {
-        const box = document.getElementById(`round-box-${i}`);
-        const label = document.getElementById(`round-winner-${i}`);
-        if(i === 1) {
-            box.className = "w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 text-red-400 flex items-center justify-center font-bold text-xs shadow";
-        } else {
-            box.className = "w-8 h-8 rounded-full border-2 border-slate-700 bg-slate-800 text-gray-400 flex items-center justify-center font-bold text-xs shadow";
-        }
-        label.innerText = "PENDIENTE";
-        label.className = "text-[9px] font-extrabold text-gray-400";
-    }
-
+    updateRoundCirclesFromSheets();
     updateTimerDisplay();
     document.getElementById('timer-btn').innerHTML = `<i class="fa-solid fa-play"></i>`;
 }
