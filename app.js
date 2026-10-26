@@ -187,19 +187,7 @@ function filterSandaCategory(categoryName) {
     renderMatchesList(filtered);
 }
 
-// Lógica de Ganador por Rounds (Fórmula equivalente solicitada)
-function evaluateMatchWinner(r1, r2, r3) {
-    if (r1 === "-" && r2 === "-" && r3 === "-") return "";
-    if (r1 === "ROJO" && r2 === "ROJO" && r3 === "-") return "ROJO";
-    if (r1 === "AZUL" && r2 === "AZUL" && r3 === "-") return "AZUL";
-    if (r1 === "ROJO" && r2 === "AZUL" && r3 === "ROJO") return "ROJO";
-    if (r1 === "ROJO" && r2 === "AZUL" && r3 === "AZUL") return "AZUL";
-    if (r1 === "AZUL" && r2 === "ROJO" && r3 === "ROJO") return "ROJO";
-    if (r1 === "AZUL" && r2 === "ROJO" && r3 === "AZUL") return "AZUL";
-    return "";
-}
-
-// Renderizar Árbol de Llaves con líneas conectoras de torneo
+// Renderizar Árbol de Llaves con líneas conectoras de torneo oficiales y estados desde Google Sheets
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
@@ -217,11 +205,6 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         return;
     }
 
-    // Separar preliminares/cuartos de semifinales/finales si aplica
-    const prelims = llaveKeys.filter(k => k.includes('P') || k.includes('0') || k.includes('1') || k.includes('2') || k.includes('3'));
-    const semis = llaveKeys.filter(k => k.includes('S') || k.includes('SEM'));
-    const finals = llaveKeys.filter(k => k.includes('F') || k.includes('FINAL') || k.includes('61'));
-
     const createCardHtml = (llaveId) => {
         const fighters = pairs[llaveId];
         const r = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0] || {};
@@ -229,9 +212,14 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
 
         const llaveRow = llavesData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda) === llaveId);
         const estadoLlave = llaveRow ? (llaveRow.Estado || llaveRow.estado || "Pendiente") : "Pendiente";
+        const ganadorOficial = llaveRow ? (llaveRow.Ganador || llaveRow.ganador || "").toUpperCase() : "";
 
         const redName = r.Nombre_Completo || r.nombre_completo || "Por definir";
         const blueName = b.Nombre_Completo || b.nombre_completo || "Por definir";
+
+        // Clases para atenuar texto si hay ganador oficial
+        const redClass = ganadorOficial === "AZUL" ? "text-gray-500 line-through opacity-60" : "text-white font-bold";
+        const blueClass = ganadorOficial === "ROJO" ? "text-gray-500 line-through opacity-60" : "text-white font-bold";
 
         const redObj = {
             name: redName,
@@ -250,18 +238,18 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900/90 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-xl transition w-[280px] flex-shrink-0">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-slate-900/90 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-xl transition w-[260px] flex-shrink-0">
                 <div class="bg-slate-950 px-3 py-1.5 flex justify-between items-center border-b border-mmcBorder">
                     <span class="bg-slate-900 text-white font-mono text-xs font-black px-2 py-0.5 rounded border border-slate-700">${llaveId}</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded ${estadoLlave.toUpperCase() === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
                 <div class="p-2.5 space-y-1.5">
                     <div class="flex justify-between items-center bg-red-950/40 px-2.5 py-1.5 rounded border-l-4 border-red-600">
-                        <span class="font-bold text-xs text-white truncate max-w-[190px]">${redName}</span>
+                        <span class="text-xs truncate max-w-[170px] ${redClass}">${redName}</span>
                         <span class="text-[9px] font-black text-red-400">ROJO</span>
                     </div>
                     <div class="flex justify-between items-center bg-blue-950/40 px-2.5 py-1.5 rounded border-l-4 border-blue-600">
-                        <span class="font-bold text-xs text-white truncate max-w-[190px]">${blueName}</span>
+                        <span class="text-xs truncate max-w-[170px] ${blueClass}">${blueName}</span>
                         <span class="text-[9px] font-black text-blue-400">AZUL</span>
                     </div>
                 </div>
@@ -274,39 +262,39 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         `;
     };
 
-    // Estructura visual estilo árbol con conectores CSS
+    // Estructura visual de árbol con columnas y conectores tal como en las referencias
     container.innerHTML = `
-        <!-- Columna Preliminares / Cuartos -->
-        <div class="space-y-6 flex flex-col justify-around">
+        <!-- Columna Cuartos de Final / Preliminares -->
+        <div class="space-y-4 flex flex-col justify-around">
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center block">Cuartos de Final</span>
-            <div class="space-y-6">
+            <div class="space-y-4">
                 ${llaveKeys.map(k => createCardHtml(k)).join('')}
             </div>
         </div>
 
-        <!-- Conector Línea Vertical -->
+        <!-- Conector Línea Vertical de Árbol -->
         <div class="hidden lg:flex flex-col items-center justify-center h-full">
-            <div class="w-8 h-32 border-r-2 border-t-2 border-b-2 border-slate-700 rounded-r-xl"></div>
+            <div class="w-8 h-40 border-r-2 border-t-2 border-b-2 border-slate-700 rounded-r-xl"></div>
         </div>
 
-        <!-- Columna Semifinales -->
-        <div class="space-y-6 flex flex-col justify-around">
+        <!-- Columna Semifinal -->
+        <div class="space-y-4 flex flex-col justify-around">
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center block">Semifinal</span>
-            <div class="bg-slate-900/60 border border-mmcBorder rounded-xl p-4 w-[280px] space-y-3 text-center">
-                <span class="text-xs font-bold text-mmcGold uppercase">Semifinal A / B</span>
-                <p class="text-[11px] text-gray-400 italic">Ganadores de llaves previas avanzan a esta fase</p>
+            <div class="bg-slate-900/80 border border-mmcBorder rounded-xl p-4 w-[260px] space-y-3 text-center shadow-lg">
+                <span class="text-[10px] font-bold text-mmcGold uppercase bg-slate-950 px-2 py-1 rounded">S1 / S2</span>
+                <p class="text-[11px] text-gray-300 font-semibold">Ganador 1 (Rojo) / Ganador 2 (Azul)</p>
             </div>
         </div>
 
         <!-- Conector Línea Final -->
         <div class="hidden lg:flex flex-col items-center justify-center h-full">
-            <div class="w-8 h-16 border-r-2 border-t-2 border-slate-700 rounded-r-xl"></div>
+            <div class="w-8 h-20 border-r-2 border-t-2 border-slate-700 rounded-r-xl"></div>
         </div>
 
         <!-- Columna Gran Final -->
-        <div class="space-y-6 flex flex-col justify-around">
+        <div class="space-y-4 flex flex-col justify-around">
             <span class="text-[10px] font-black text-mmcGold uppercase tracking-widest text-center block"><i class="fa-solid fa-trophy mr-1"></i> Gran Final</span>
-            <div class="bg-slate-900 border-2 border-mmcGold/60 rounded-xl p-4 w-[280px] space-y-2 text-center shadow-xl">
+            <div class="bg-slate-900 border-2 border-mmcGold/60 rounded-xl p-4 w-[260px] space-y-2 text-center shadow-xl">
                 <span class="text-[10px] font-bold text-mmcGold uppercase">Medalla de Oro</span>
                 <p class="text-xs font-bold text-white">Disputa por el Campeonato</p>
             </div>
@@ -424,7 +412,7 @@ function selectSandaMatch(red, blue, llaveId) {
     updateRoundCirclesFromSheets();
 }
 
-// Sincronizar ganadores, puntajes y estado desde la hoja Llaves_Sanda
+// Sincronizar datos y ganadores oficiales de Google Sheets
 async function syncMatchData() {
     try {
         const res = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
@@ -437,7 +425,7 @@ async function syncMatchData() {
             const peso = row.Peso || row.peso || "";
             return `${edad} ${nivel} ${genero} ${peso} KG`.trim() === currentCategoryFiltered;
         }), llavesSandaData);
-        alert("¡Datos, puntajes y estado de rounds actualizados desde Google Sheets!");
+        alert("¡Datos, ganadores y estado de rounds actualizados desde Google Sheets!");
     } catch (e) {
         console.error("Error al sincronizar datos:", e);
     }
@@ -464,21 +452,42 @@ function updateRoundCirclesFromSheets() {
     applyRoundCircleStyle(2, r2, `${r2RedScore} / ${r2BlueScore}`);
     applyRoundCircleStyle(3, r3, `${r3RedScore} / ${r3BlueScore}`);
 
-    // Aplicar lógica de ganador y efecto blanco y negro (grayscale) al perdedor
-    const matchWinner = evaluateMatchWinner(r1, r2, r3);
+    // Leer el ganador oficial directamente de la columna "Ganador" de la hoja Llaves_Sanda
+    const oficialGanador = llaveRow ? (llaveRow.Ganador || llaveRow.ganador || "").toUpperCase() : "";
+
     const redImg = document.getElementById('red-fighter-img');
     const blueImg = document.getElementById('blue-fighter-img');
+    const cardRoja = document.getElementById('card-esquina-roja');
+    const cardAzul = document.getElementById('card-esquina-azul');
+    const overlayRojo = document.getElementById('bg-overlay-rojo');
+    const overlayAzul = document.getElementById('bg-overlay-azul');
 
-    if (redImg && blueImg) {
-        if (matchWinner === "ROJO") {
+    if (redImg && blueImg && cardRoja && cardAzul) {
+        if (oficialGanador === "ROJO") {
+            // Destacar Esquina Roja (Brillo / Ring) y poner Azul en blanco y negro (grayscale)
             redImg.style.filter = "none";
-            blueImg.style.filter = "grayscale(100%) brightness(70%)";
-        } else if (matchWinner === "AZUL") {
+            cardRoja.classList.add("ring-4", "ring-red-500", "shadow-red-500/50");
+            if (overlayRojo) overlayRojo.style.background = "linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(127,29,29,0.5), rgba(0,0,0,0.8))";
+
+            blueImg.style.filter = "grayscale(100%) brightness(60%)";
+            cardAzul.classList.remove("ring-4", "ring-blue-500", "shadow-blue-500/50");
+            if (overlayAzul) overlayAzul.style.background = "linear-gradient(to bottom, rgba(20,20,20,0.9), rgba(40,40,40,0.8), rgba(10,10,10,0.9))";
+        } else if (oficialGanador === "AZUL") {
+            // Destacar Esquina Azul (Brillo / Ring) y poner Roja en blanco y negro (grayscale)
             blueImg.style.filter = "none";
-            redImg.style.filter = "grayscale(100%) brightness(70%)";
+            cardAzul.classList.add("ring-4", "ring-blue-500", "shadow-blue-500/50");
+            if (overlayAzul) overlayAzul.style.background = "linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(30,58,138,0.5), rgba(0,0,0,0.8))";
+
+            redImg.style.filter = "grayscale(100%) brightness(60%)";
+            cardRoja.classList.remove("ring-4", "ring-red-500", "shadow-red-500/50");
+            if (overlayRojo) overlayRojo.style.background = "linear-gradient(to bottom, rgba(20,20,20,0.9), rgba(40,40,40,0.8), rgba(10,10,10,0.9))";
         } else {
             redImg.style.filter = "none";
             blueImg.style.filter = "none";
+            cardRoja.classList.remove("ring-4", "ring-red-500", "shadow-red-500/50");
+            cardAzul.classList.remove("ring-4", "ring-blue-500", "shadow-blue-500/50");
+            if (overlayRojo) overlayRojo.style.background = "";
+            if (overlayAzul) overlayAzul.style.background = "";
         }
     }
 }

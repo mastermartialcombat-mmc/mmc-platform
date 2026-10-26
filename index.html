@@ -93,8 +93,8 @@
             <div class="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
                 
                 <!-- Esquina Roja -->
-                <div id="card-esquina-roja" class="xl:col-span-4 border-2 border-red-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px]">
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-red-950/70 to-black/90 z-0"></div>
+                <div id="card-esquina-roja" class="xl:col-span-4 border-2 border-red-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px] transition-all duration-300">
+                    <div id="bg-overlay-rojo" class="absolute inset-0 bg-gradient-to-b from-black/80 via-red-950/70 to-black/90 z-0 transition-all duration-300"></div>
                     
                     <div id="sanda-red-photo-container" class="w-full h-56 md:h-64 overflow-hidden relative border-b border-red-600/30 z-10 flex justify-center">
                         <i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>
@@ -171,8 +171,8 @@
                 </div>
 
                 <!-- Esquina Azul -->
-                <div id="card-esquina-azul" class="xl:col-span-4 border-2 border-blue-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px]">
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-blue-950/70 to-black/90 z-0"></div>
+                <div id="card-esquina-azul" class="xl:col-span-4 border-2 border-blue-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px] transition-all duration-300">
+                    <div id="bg-overlay-azul" class="absolute inset-0 bg-gradient-to-b from-black/80 via-blue-950/70 to-black/90 z-0 transition-all duration-300"></div>
 
                     <div id="sanda-blue-photo-container" class="w-full h-56 md:h-64 overflow-hidden relative border-b border-blue-600/30 z-10 flex justify-center">
                         <i class="fa-solid fa-user text-6xl text-gray-600 absolute inset-0 m-auto w-fit h-fit"></i>
@@ -202,7 +202,7 @@
 
             </div>
 
-            <!-- SECCIÓN DE ÁRBOL DE LLAVES (BRACKET CON LÍNEAS CONECTORAS) -->
+            <!-- SECCIÓN DE ÁRBOL DE LLAVES (BRACKET CON LÍNEAS CONECTORAS OFICIALES) -->
             <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-6">
                 <!-- Subtítulo de Categoría Completo -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-mmcBorder">
@@ -213,9 +213,9 @@
                     <span id="bracket-category-title" class="bg-slate-800 text-mmcGold text-xs font-black px-4 py-2 rounded-lg border border-mmcBorder uppercase shadow">---</span>
                 </div>
                 
-                <!-- Contenedor con Scroll Horizontal fluido para el Árbol de Llaves con líneas -->
+                <!-- Contenedor con Scroll Horizontal fluido para el Árbol de Llaves con líneas de torneo -->
                 <div class="overflow-x-auto py-6">
-                    <div id="tournament-brackets-container" class="min-w-[950px] flex items-center justify-between gap-6 px-4">
+                    <div id="tournament-brackets-container" class="min-w-[950px] flex items-center justify-around gap-4 px-4">
                         <!-- El árbol completo con columnas y conectores se generará aquí -->
                     </div>
                 </div>
