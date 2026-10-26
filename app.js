@@ -1,13 +1,12 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Recuerda poner tu URL real de Apps Script
-
-// URL del Logo oficial proporcionado por Marycielo
+const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Recuerda mantener tu URL real de Apps Script
 const LOGO_DRIVE_URL = "https://drive.google.com/file/d/1EM8MEbYssMssn1NKQfAIqA6n3Fvr1Zrb/view?usp=drive_link";
 
 let championshipData = [];
+let sandaData = [];
 let taoluData = [];
 let medalleroData = [];
 
-// Convertidor automático de enlaces de Google Drive para imágenes directas
+// Convertidor automático de Google Drive para imágenes directas
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
     const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -17,12 +16,9 @@ function convertToDirectDriveUrl(url) {
     return url;
 }
 
-// Cargar Logo al iniciar
 document.addEventListener('DOMContentLoaded', () => {
     const logoImg = document.getElementById('nav-logo');
-    if (logoImg) {
-        logoImg.src = convertToDirectDriveUrl(LOGO_DRIVE_URL);
-    }
+    if (logoImg) logoImg.src = convertToDirectDriveUrl(LOGO_DRIVE_URL);
     loadAllData();
 });
 
@@ -57,6 +53,10 @@ async function loadAllData() {
         championshipData = await resChamp.json();
         renderChampionships(championshipData);
 
+        const resSanda = await fetch(`${API_URL}?sheet=Sanda`);
+        sandaData = await resSanda.json();
+        initSandaModule(sandaData);
+
         const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
         taoluData = await resTaolu.json();
         renderTaoluGroups(taoluData);
@@ -69,12 +69,13 @@ async function loadAllData() {
     }
 }
 
+// Renderizar Tarjetas de Campeonatos con Banner de Fondo y botón "Entrar al Evento"
 function renderChampionships(data) {
     const container = document.getElementById('championships-grid');
     if (!container) return;
 
     if (!data || data.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 col-span-full">No se encontraron campeonatos en el Excel.</p>`;
+        container.innerHTML = `<p class="text-gray-400 col-span-full">No se encontraron campeonatos registrados.</p>`;
         return;
     }
 
@@ -82,23 +83,268 @@ function renderChampionships(data) {
         const nombre = item.Nombre_Campeonato || item.nombre_campeonato || "Campeonato Wushu";
         const sede = item.Sede || item.sede || "Lima, Perú";
         const estado = item.Estado_Competencia || item.estado_competencia || "EN CURSO";
+        const bannerUrl = convertToDirectDriveUrl(item.Banner_URL || item.banner_url || "");
 
         return `
-            <div class="bg-mmcCard border border-mmcBorder hover:border-mmcGold transition rounded-xl p-5 flex flex-col justify-between space-y-4 shadow-xl">
-                <div class="space-y-2">
+            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-xl min-h-[220px] flex flex-col justify-end p-6">
+                <!-- Imagen de Fondo centrada y rellenando el contenedor -->
+                ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-900"></div>`}
+                <!-- Capa oscura para legibilidad -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+
+                <!-- Contenido -->
+                <div class="relative z-10 space-y-2">
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${estado}</span>
-                    <h4 class="text-lg font-black text-white">${nombre}</h4>
-                    <p class="text-xs text-gray-400 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-mmcGold"></i> ${sede}</p>
+                    <h4 class="text-lg font-black text-white leading-snug">${nombre}</h4>
+                    <p class="text-xs text-gray-300 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-mmcGold"></i> ${sede}</p>
+                    <button onclick="switchView('sanda')" class="w-full mt-2 bg-mmcGold hover:bg-yellow-500 text-black font-black py-2 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
+                        Entrar al Evento <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
                 </div>
-                <button onclick="switchView('sanda')" class="w-full bg-mmcGold hover:bg-yellow-500 text-black font-black py-2 rounded-lg text-xs uppercase tracking-wider transition shadow">
-                    ENTRAR A LA COMPETENCIA <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
             </div>
         `;
     }).join('');
 }
 
-// Renderizar Taolu dividido por Grupos y Formas
+// ==========================================
+// MÓDULO SANSHOU (SANDA) CON CRONÓMETRO DINÁMICO
+// ==========================================
+let currentMatchLevel = "AVANZADO"; // Por defecto 2:00 min
+let timerInterval = null;
+let secondsLeft = 120;
+let currentRound = 1;
+let isResting = false;
+
+function initSandaModule(data) {
+    const filtersContainer = document.getElementById('sanda-category-filters');
+    if (!filtersContainer) return;
+
+    // Agrupar por Categoría (Género, Nivel, Peso)
+    const categories = {};
+    data.forEach(row => {
+        const genero = row.Genero || row.genero || "";
+        const nivel = row.Nivel || row.nivel || "";
+        const peso = row.Peso || row.peso || "";
+        const catKey = `${genero} ${nivel} ${peso} KG`.trim();
+        
+        if (!categories[catKey]) categories[catKey] = [];
+        categories[catKey].push(row);
+    });
+
+    const catKeys = Object.keys(categories);
+    if (catKeys.length === 0) {
+        filtersContainer.innerHTML = `<span class="text-xs text-gray-400">No hay categorías configuradas.</span>`;
+        return;
+    }
+
+    // Renderizar botones de filtro por categoría
+    filtersContainer.innerHTML = catKeys.map((cat, idx) => `
+        <button onclick="filterSandaCategory('${cat}')" id="cat-btn-${idx}" class="sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold ${idx === 0 ? 'bg-mmcGold text-black' : 'bg-slate-800 text-gray-300 hover:bg-slate-700'} transition">
+            ${cat}
+        </button>
+    `).join('');
+
+    // Cargar la primera categoría por defecto
+    filterSandaCategory(catKeys[0]);
+}
+
+function filterSandaCategory(categoryName) {
+    // Actualizar estilo de botones
+    document.querySelectorAll('.sanda-cat-btn').forEach(btn => {
+        if (btn.innerText.trim() === categoryName) {
+            btn.className = "sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition";
+        } else {
+            btn.className = "sanda-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-gray-300 hover:bg-slate-700 transition";
+        }
+    });
+
+    // Filtrar peleadores de esa categoría
+    const matchesContainer = document.getElementById('sanda-matches-list');
+    const filtered = sandaData.filter(row => {
+        const genero = row.Genero || row.genero || "";
+        const nivel = row.Nivel || row.nivel || "";
+        const peso = row.Peso || row.peso || "";
+        const catKey = `${genero} ${nivel} ${peso} KG`.trim();
+        return catKey === categoryName;
+    });
+
+    // Detectar nivel para el cronómetro (Novel = 1:30 min, Avanzado = 2:00 min)
+    const sampleNivel = (filtered[0]?.Nivel || filtered[0]?.nivel || "").toUpperCase();
+    currentMatchLevel = sampleNivel.includes("NOVEL") ? "NOVEL" : "AVANZADO";
+    resetTimer();
+
+    if (filtered.length === 0) {
+        matchesContainer.innerHTML = `<p class="text-xs text-gray-400 col-span-full">No hay deportistas en esta categoría.</p>`;
+        return;
+    }
+
+    // Agrupar por Llave / Parejas (Rojo vs Azul)
+    const pairs = {};
+    filtered.forEach(row => {
+        const llave = row.ID_Llave || row.id_llave || "Combate 1";
+        if (!pairs[llave]) pairs[llave] = [];
+        pairs[llave].push(row);
+    });
+
+    matchesContainer.innerHTML = Object.keys(pairs).map(llaveId => {
+        const fighters = pairs[llaveId];
+        const redFighter = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || fighters[0];
+        const blueFighter = fighters.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || fighters[1] || {};
+
+        const redName = redFighter.Nombre_Completo || redFighter.nombre_completo || "Esquina Roja";
+        const redTeam = redFighter.Siglas || redFighter.siglas || "MMC";
+        const redPhoto = convertToDirectDriveUrl(redFighter.URL_Foto || redFighter.url_foto || "");
+
+        const blueName = blueFighter.Nombre_Completo || blueFighter.nombre_completo || "Esquina Azul";
+        const blueTeam = blueFighter.Siglas || blueFighter.siglas || "UPCH";
+        const bluePhoto = convertToDirectDriveUrl(blueFighter.URL_Foto || blueFighter.url_foto || "");
+
+        return `
+            <div onclick='selectSandaMatch(${JSON.stringify(redName)}, ${JSON.stringify(redTeam)}, ${JSON.stringify(redPhoto)}, ${JSON.stringify(blueName)}, ${JSON.stringify(blueTeam)}, ${JSON.stringify(bluePhoto)})' class="bg-slate-900 border border-mmcBorder hover:border-mmcGold cursor-pointer rounded-xl p-4 transition space-y-3 shadow-md">
+                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
+                    <span>Llave: ${llaveId}</span>
+                    <span class="text-mmcGold">${categoryName}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                    <div class="bg-red-950/30 p-2 rounded border border-red-600/20 truncate">
+                        <span class="text-red-400 font-bold block text-[9px]">ROJO</span>
+                        <span class="text-white font-semibold truncate block">${redName}</span>
+                    </div>
+                    <div class="bg-blue-950/30 p-2 rounded border border-blue-600/20 truncate">
+                        <span class="text-blue-400 font-bold block text-[9px]">AZUL</span>
+                        <span class="text-white font-semibold truncate block">${blueName}</span>
+                    </div>
+                </div>
+                <button class="w-full bg-slate-800 hover:bg-slate-700 text-mmcGold text-[11px] font-bold py-1.5 rounded uppercase transition">
+                    Cargar en Marcador En Vivo
+                </button>
+            </div>
+        `;
+    }).join('');
+
+    // Cargar automáticamente el primer combate en el marcador
+    if (Object.keys(pairs).length > 0) {
+        const firstPair = Object.values(pairs)[0];
+        const r = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "ROJO") || firstPair[0];
+        const b = firstPair.find(f => (f.Color || f.color || "").toUpperCase() === "AZUL") || firstPair[1] || {};
+        selectSandaMatch(
+            r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
+            r.Siglas || r.siglas || "MMC",
+            convertToDirectDriveUrl(r.URL_Foto || r.url_foto || ""),
+            b.Nombre_Completo || b.nombre_completo || "Esquina Azul",
+            b.Siglas || b.siglas || "UPCH",
+            convertToDirectDriveUrl(b.URL_Foto || b.url_foto || "")
+        );
+    }
+}
+
+function selectSandaMatch(redName, redTeam, redPhoto, blueName, blueTeam, bluePhoto) {
+    document.getElementById('sanda-red-name').innerText = redName;
+    document.getElementById('sanda-red-team').innerText = redTeam;
+    document.getElementById('sanda-blue-name').innerText = blueName;
+    document.getElementById('sanda-blue-team').innerText = blueTeam;
+
+    const redAvatar = document.getElementById('sanda-red-avatar');
+    if (redAvatar) {
+        redAvatar.innerHTML = redPhoto ? `<img src="${redPhoto}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-3xl text-gray-600"></i>`;
+    }
+
+    const blueAvatar = document.getElementById('sanda-blue-avatar');
+    if (blueAvatar) {
+        blueAvatar.innerHTML = bluePhoto ? `<img src="${bluePhoto}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-3xl text-gray-600"></i>`;
+    }
+}
+
+// Lógica del Cronómetro de Sanda (Novel 1:30, Avanzado 2:00, Descanso 1:00)
+function toggleTimer() {
+    const btn = document.getElementById('timer-btn');
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Reanudar`;
+    } else {
+        timerInterval = setInterval(() => {
+            if (secondsLeft > 0) {
+                secondsLeft--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                if (!isResting) {
+                    alert("¡Asalto finalizado! Tiempo de descanso.");
+                    startRestPeriod();
+                } else {
+                    alert("¡Descanso finalizado! Siguiente asalto.");
+                    nextRound();
+                }
+            }
+        }, 1000);
+        btn.innerHTML = `<i class="fa-solid fa-pause mr-1"></i> Pausar`;
+    }
+}
+
+function startRestPeriod() {
+    isResting = true;
+    secondsLeft = 60; // 1 minuto de descanso
+    document.getElementById('sanda-round-title').innerText = `DESCANSO`;
+    document.getElementById('sanda-level-badge').innerText = `Recuperación (1:00 min)`;
+    updateTimerDisplay();
+    toggleTimer(); // Iniciar descanso automáticamente
+}
+
+function nextRound() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    isResting = false;
+    currentRound = currentRound < 3 ? currentRound + 1 : 1;
+    
+    // Configurar tiempo según nivel
+    secondsLeft = currentMatchLevel === "NOVEL" ? 90 : 120;
+    
+    document.getElementById('sanda-round-title').innerText = `ASALTO ${currentRound} / 3`;
+    document.getElementById('sanda-level-badge').innerText = `Nivel ${currentMatchLevel} (${currentMatchLevel === "NOVEL" ? "1:30" : "2:00"} min)`;
+    
+    // Actualizar círculos indicadores
+    for(let i=1; i<=3; i++) {
+        const dot = document.getElementById(`round-dot-${i}`);
+        if(i < currentRound) dot.className = "w-3.5 h-3.5 rounded-full bg-red-600";
+        else if(i === currentRound) dot.className = "w-3.5 h-3.5 rounded-full bg-red-500 shadow-md animate-pulse";
+        else dot.className = "w-3.5 h-3.5 rounded-full bg-gray-700";
+    }
+
+    updateTimerDisplay();
+    document.getElementById('timer-btn').innerHTML = `<i class="fa-solid fa-play mr-1"></i> Iniciar`;
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    isResting = false;
+    currentRound = 1;
+    secondsLeft = currentMatchLevel === "NOVEL" ? 90 : 120;
+    
+    document.getElementById('sanda-round-title').innerText = `ASALTO 1 / 3`;
+    document.getElementById('sanda-level-badge').innerText = `Nivel ${currentMatchLevel} (${currentMatchLevel === "NOVEL" ? "1:30" : "2:00"} min)`;
+    
+    for(let i=1; i<=3; i++) {
+        const dot = document.getElementById(`round-dot-${i}`);
+        if(i === 1) dot.className = "w-3.5 h-3.5 rounded-full bg-red-500 shadow-md";
+        else dot.className = "w-3.5 h-3.5 rounded-full bg-gray-700";
+    }
+
+    updateTimerDisplay();
+    document.getElementById('timer-btn').innerHTML = `<i class="fa-solid fa-play mr-1"></i> Iniciar`;
+}
+
+function updateTimerDisplay() {
+    const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+    const s = String(secondsLeft % 60).padStart(2, '0');
+    document.getElementById('sanda-timer').innerText = `${m}:${s}`;
+}
+
+// ==========================================
+// MÓDULO TAOLU
+// ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
     const filtersContainer = document.getElementById('taolu-groups-filters');
@@ -109,7 +355,6 @@ function renderTaoluGroups(data) {
         return;
     }
 
-    // Agrupar por Forma y Código
     const groups = {};
     data.forEach(row => {
         const forma = row.Nombre_Forma || row.nombre_forma || "Rutina General";
@@ -120,16 +365,10 @@ function renderTaoluGroups(data) {
         groups[grupoKey].push(row);
     });
 
-    // Ordenar deportistas dentro de cada grupo por Orden de Salida
     Object.keys(groups).forEach(key => {
-        groups[key].sort((a, b) => {
-            const ordenA = Number(a.Orden_Salida || a.orden_salida || 99);
-            const ordenB = Number(b.Orden_Salida || b.orden_salida || 99);
-            return ordenA - ordenB;
-        });
+        groups[key].sort((a, b) => Number(a.Orden_Salida || a.orden_salida || 99) - Number(b.Orden_Salida || b.orden_salida || 99));
     });
 
-    // Renderizar botones de filtro y tablas por grupo
     let filterHtml = `<button onclick="filterTaoluGroup('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition">Todos los Grupos</button>`;
     let htmlContent = '';
 
@@ -198,8 +437,7 @@ function renderTaoluGroups(data) {
 }
 
 function filterTaoluGroup(groupId) {
-    const cards = document.querySelectorAll('.taolu-group-card');
-    cards.forEach(card => {
+    document.querySelectorAll('.taolu-group-card').forEach(card => {
         if (groupId === 'ALL' || card.getAttribute('data-groupid') === groupId) {
             card.style.display = 'block';
         } else {
@@ -215,14 +453,13 @@ function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl) {
     
     const avatarContainer = document.getElementById('taolu-avatar-container');
     if (avatarContainer) {
-        if (fotoUrl) {
-            avatarContainer.innerHTML = `<img src="${fotoUrl}" class="w-full h-full object-cover">`;
-        } else {
-            avatarContainer.innerHTML = `<i class="fa-solid fa-user text-2xl text-gray-500"></i>`;
-        }
+        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-2xl text-gray-500"></i>`;
     }
 }
 
+// ==========================================
+// MÓDULO MEDALLERO
+// ==========================================
 function renderMedallero(data) {
     const container = document.getElementById('medallero-table-container');
     if (!container) return;
@@ -265,35 +502,4 @@ function renderMedallero(data) {
             </tbody>
         </table>
     `;
-}
-
-let timerInterval = null;
-let seconds = 120;
-function toggleTimer() {
-    const btn = document.getElementById('timer-btn');
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        btn.innerText = "Iniciar";
-    } else {
-        timerInterval = setInterval(() => {
-            if (seconds > 0) {
-                seconds--;
-                const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-                const s = String(seconds % 60).padStart(2, '0');
-                document.getElementById('sanda-timer').innerText = `${m}:${s}`;
-            } else {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }, 1000);
-        btn.innerText = "Pausar";
-    }
-}
-function resetTimer() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    seconds = 120;
-    document.getElementById('sanda-timer').innerText = `02:00`;
-    document.getElementById('timer-btn').innerText = "Iniciar";
 }
