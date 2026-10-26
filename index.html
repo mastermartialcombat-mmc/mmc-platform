@@ -89,11 +89,11 @@
                 </div>
             </div>
 
-            <!-- MARCADOR PRINCIPAL ADAPTADO AL ANCHO DE VENTANA (GRID FLEXIBLE SIN SCROLL HORIZONTAL) -->
-            <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <!-- MARCADOR PRINCIPAL UNIFICADO EN UN SOLO BLOQUE ADAPTADO AL ANCHO DE PANTALLA -->
+            <div class="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
                 
                 <!-- Esquina Roja -->
-                <div id="card-esquina-roja" class="lg:col-span-4 border-2 border-red-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px]">
+                <div id="card-esquina-roja" class="xl:col-span-4 border-2 border-red-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px]">
                     <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-red-950/70 to-black/90 z-0"></div>
                     
                     <div id="sanda-red-photo-container" class="w-full h-56 md:h-64 overflow-hidden relative border-b border-red-600/30 z-10 flex justify-center">
@@ -123,7 +123,7 @@
                 </div>
 
                 <!-- Marcador Central -->
-                <div class="lg:col-span-4 bg-slate-900/95 border border-mmcBorder rounded-2xl p-4 md:p-5 flex flex-col items-center justify-between text-center space-y-3 shadow-2xl">
+                <div class="xl:col-span-4 bg-slate-900/95 border border-mmcBorder rounded-2xl p-4 md:p-5 flex flex-col items-center justify-between text-center space-y-3 shadow-2xl">
                     <div>
                         <span id="sanda-round-title" class="text-xs font-black text-gray-300 uppercase tracking-widest">ASALTO 1 / 3</span>
                         <h5 id="sanda-level-badge" class="text-[10px] text-mmcGold uppercase font-extrabold tracking-wider mt-0.5">Nivel Avanzado (2:00 min)</h5>
@@ -171,7 +171,7 @@
                 </div>
 
                 <!-- Esquina Azul -->
-                <div id="card-esquina-azul" class="lg:col-span-4 border-2 border-blue-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px]">
+                <div id="card-esquina-azul" class="xl:col-span-4 border-2 border-blue-600/60 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl relative bg-cover bg-center min-h-[400px]">
                     <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-blue-950/70 to-black/90 z-0"></div>
 
                     <div id="sanda-blue-photo-container" class="w-full h-56 md:h-64 overflow-hidden relative border-b border-blue-600/30 z-10 flex justify-center">
@@ -184,7 +184,7 @@
                             <div class="flex items-center space-x-2.5 mt-2">
                                 <div id="sanda-blue-school-logo" class="w-7 h-7 rounded-full bg-slate-900 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center">
                                     <i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>
-                                </div>
+                                </div >
                                 <div class="text-xs leading-tight">
                                     <span id="sanda-blue-siglas" class="font-extrabold text-white block">UPCH</span>
                                     <span id="sanda-blue-inst" class="text-[10px] text-gray-300 block truncate max-w-[180px]">Universidad Peruana Cayetano Heredia</span>
@@ -200,6 +200,95 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- SECCIÓN DE LLAVES DEL TORNEO (BRACKET) -->
+            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-mmcBorder">
+                    <div>
+                        <h3 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-sitemap text-mmcGold mr-2"></i> Llaves de Eliminación - Categoría</h3>
+                        <p class="text-xs text-gray-400 mt-1">Estructura de enfrentamientos y avance de los ganadores hacia la final</p>
+                    </div>
+                    <span id="bracket-category-title" class="bg-slate-800 text-mmcGold text-xs font-black px-3 py-1.5 rounded-lg border border-mmcBorder uppercase">FEMENINO AVANZADO -56 KG</span>
+                </div>
+                
+                <!-- Contenedor del Bracket Gráfico -->
+                <div id="tournament-bracket-container" class="overflow-x-auto py-4">
+                    <div class="min-w-[900px] grid grid-cols-3 gap-8 items-center">
+                        
+                        <!-- Columna Cuartos / Llaves Preliminares -->
+                        <div class="space-y-4">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Combates Preliminares</span>
+                            
+                            <div class="bg-slate-900 border border-mmcBorder rounded-xl p-3 shadow space-y-2 relative">
+                                <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+                                    <span>LLAVE: P01</span>
+                                    <span class="bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">Pendiente</span>
+                                </div>
+                                <div class="space-y-1 text-xs">
+                                    <div class="flex justify-between items-center bg-red-950/30 p-1.5 rounded border border-red-600/20">
+                                        <span class="font-bold text-white">MATÍAS CUBA, Marycielo</span>
+                                        <span class="text-[10px] text-red-400 font-bold">ROJO</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-blue-950/30 p-1.5 rounded border border-blue-600/20">
+                                        <span class="font-bold text-white">CUBA HUAMANI, Ana Celina</span>
+                                        <span class="text-[10px] text-blue-400 font-bold">AZUL</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900 border border-mmcBorder rounded-xl p-3 shadow space-y-2 relative">
+                                <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+                                    <span>LLAVE: P02</span>
+                                    <span class="bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">Pendiente</span>
+                                </div>
+                                <div class="space-y-1 text-xs">
+                                    <div class="flex justify-between items-center bg-red-950/30 p-1.5 rounded border border-red-600/20">
+                                        <span class="font-bold text-white">MATÍAS CUBA, Marycielo</span>
+                                        <span class="text-[10px] text-red-400 font-bold">ROJO</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-blue-950/30 p-1.5 rounded border border-blue-600/20">
+                                        <span class="font-bold text-white">TORRES GALVAN, Fabiana Lucia</span>
+                                        <span class="text-[10px] text-blue-400 font-bold">AZUL</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna Semifinales -->
+                        <div class="space-y-4">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Semifinales</span>
+                            
+                            <div class="bg-slate-900 border border-mmcBorder rounded-xl p-3 shadow space-y-2">
+                                <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+                                    <span>LLAVE: S01</span>
+                                    <span class="text-gray-500">Por definir</span>
+                                </div>
+                                <div class="space-y-1 text-xs">
+                                    <div class="p-1.5 rounded bg-slate-800 text-gray-300 font-semibold">Ganador del Combate P01</div>
+                                    <div class="p-1.5 rounded bg-slate-800 text-gray-300 font-semibold">Ganador del Combate P02</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna Final -->
+                        <div class="space-y-4">
+                            <span class="text-[10px] font-black text-mmcGold uppercase tracking-widest block mb-2"><i class="fa-solid fa-trophy mr-1"></i> Gran Final</span>
+                            
+                            <div class="bg-slate-900 border-2 border-mmcGold/50 rounded-xl p-4 shadow-xl space-y-2">
+                                <div class="flex justify-between items-center text-[10px] text-mmcGold font-bold uppercase">
+                                    <span>MEDALLA DE ORO</span>
+                                    <span>Pendiente</span>
+                                </div>
+                                <div class="space-y-1 text-xs">
+                                    <div class="p-2 rounded bg-slate-800/80 text-gray-300 font-bold text-center border border-mmcBorder">Ganador Semifinal A</div>
+                                    <div class="p-2 rounded bg-slate-800/80 text-gray-300 font-bold text-center border border-mmcBorder">Ganador Semifinal B</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
 
             <!-- Listado de Peleas por Categoría -->

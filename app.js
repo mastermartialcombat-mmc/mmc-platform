@@ -165,6 +165,8 @@ function filterSandaCategory(categoryName) {
         }
     });
 
+    document.getElementById('bracket-category-title').innerText = categoryName;
+
     const matchesContainer = document.getElementById('sanda-matches-list');
     const filtered = sandaData.filter(row => {
         const genero = row.Genero || row.genero || "";
@@ -196,7 +198,6 @@ function filterSandaCategory(categoryName) {
 
         const ordenLlave = llaveId.includes('/') ? llaveId.split('/')[1] : llaveId;
 
-        // Tomando Nombre_Escuela de la hoja Sanda
         const redObj = {
             name: r.Nombre_Completo || r.nombre_completo || "Esquina Roja",
             siglas: r.Siglas || r.siglas || "MMC",
@@ -291,7 +292,6 @@ function selectSandaMatch(red, blue, llaveId) {
     updateRoundCirclesFromSheets();
 }
 
-// Sincronizar ganadores y puntajes reales desde la hoja Llaves_Sanda
 async function syncMatchData() {
     try {
         const res = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
@@ -322,7 +322,7 @@ function updateRoundCirclesFromSheets() {
 
     applyRoundCircleStyle(1, r1Winner, `${r1RedScore} / ${r1BlueScore}`);
     applyRoundCircleStyle(2, r2Winner, `${r2RedScore} / ${r2BlueScore}`);
-    applyRoundCircleStyle(3, r3Winner, `${r3RedScore} / ${r3BlueScore}`);
+    applyRoundCircleStyle(3, r3Winner, `${r3Winner} / ${r3BlueScore}`);
 }
 
 function applyRoundCircleStyle(roundNum, winnerColor, scoreText) {
@@ -330,7 +330,6 @@ function applyRoundCircleStyle(roundNum, winnerColor, scoreText) {
     const scoreLabel = document.getElementById(`round-score-${roundNum}`);
     if (!circle || !scoreLabel) return;
 
-    // Mostrar puntajes reales de las columnas del excel (ROJO_RoundX / AZUL_RoundX)
     scoreLabel.innerText = scoreText;
 
     if (winnerColor === "ROJO") {
