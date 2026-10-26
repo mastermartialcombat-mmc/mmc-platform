@@ -27,29 +27,33 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-mmcDark text-gray-100 font-sans antialiased min-h-screen flex flex-col selection:bg-mmcGold selection:text-black">
+<body class="bg-mmcDark text-gray-100 font-sans antialiased min-h-screen flex flex-col selection:bg-mmcGold selection:text-black pb-20 md:pb-0">
 
     <!-- Header / Navbar Desktop -->
     <header class="bg-mmcCard/90 backdrop-blur border-b border-mmcBorder sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+            <!-- Logotipo oficial de Drive con respaldo -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
-                <div class="bg-mmcGold text-black font-black px-2.5 py-1 rounded text-xl tracking-tighter">MMC</div>
+                <div class="flex items-center space-x-2">
+                    <img src="https://drive.google.com/uc?export=view&id=1EM8MEbYssMssn1NKQfAIqA6n3Fvr1Zrb" alt="MMC Logo" class="h-10 w-auto object-contain" onerror="this.style.display='none'">
+                    <span class="bg-mmcGold text-black font-black px-2 py-0.5 rounded text-lg tracking-tighter">MMC</span>
+                </div>
                 <div>
-                    <h1 class="text-sm font-bold tracking-wider uppercase text-white leading-none">Master Martial Combat</h1>
-                    <span class="text-[10px] text-mmcGold font-semibold tracking-widest uppercase">Wushu • Sanda • Taolu</span>
+                    <h1 class="text-xs md:text-sm font-bold tracking-wider uppercase text-white leading-none">Master Martial Combat</h1>
+                    <span class="text-[9px] md:text-[10px] text-mmcGold font-semibold tracking-widest uppercase">Wushu • Sanda • Taolu</span>
                 </div>
             </div>
 
             <!-- Menú Principal Desktop -->
             <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
-                <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-mmcGold bg-mmcBorder/50 hover:bg-mmcBorder transition"><i class="fa-solid fa-house mr-2"></i>Inicio</button>
+                <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-mmcGold bg-mmcBorder/50 transition"><i class="fa-solid fa-house mr-2"></i>Inicio</button>
                 <button onclick="switchView('sanda')" id="nav-sanda" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-hand-fist mr-2"></i>Sanshou</button>
                 <button onclick="switchView('taolu')" id="nav-taolu" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-person-swimming mr-2"></i>Taolu</button>
                 <button onclick="switchView('medallero')" id="nav-medallero" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-trophy mr-2"></i>Medallero</button>
             </nav>
 
             <div class="flex items-center space-x-2">
-                <span id="live-indicator" class="hidden flex items-center bg-red-600/20 text-red-400 border border-red-500/30 text-xs px-2.5 py-1 rounded-full font-bold animate-pulse">
+                <span class="flex items-center bg-red-600/20 text-red-400 border border-red-500/30 text-xs px-2.5 py-1 rounded-full font-bold animate-pulse">
                     <span class="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span> EN VIVO
                 </span>
             </div>
@@ -57,143 +61,75 @@
     </header>
 
     <!-- Contenedor Principal de Vistas -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 space-y-10">
         
         <!-- Vista 1: INICIO (Home) -->
         <section id="view-home" class="view-section space-y-8">
-            <!-- Banner Hero -->
-            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder bg-gradient-to-r from-slate-900 via-slate-800 to-black p-6 md:p-10">
-                <div class="max-w-2xl space-y-4">
-                    <span class="bg-mmcGold/20 text-mmcGold border border-mmcGold/30 text-xs px-3 py-1 rounded-full uppercase font-extrabold tracking-wider">Master Martial Combat</span>
-                    <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight uppercase leading-none">Competencias de <span class="text-mmcGold">Wushu</span></h2>
-                    <p class="text-gray-400 text-sm md:text-base">Sigue cada combate, rutina, transmisión en vivo y resultados oficiales en tiempo real.</p>
+            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder bg-gradient-to-r from-slate-900 via-slate-800 to-black p-6 md:p-12 shadow-2xl">
+                <div class="max-w-xl space-y-4">
+                    <span class="bg-mmcGold/20 text-mmcGold border border-mmcGold/30 text-xs px-3 py-1 rounded-full uppercase font-extrabold tracking-wider">Torneos Oficiales de Wushu</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight uppercase leading-none">Competencias de Wushu</h2>
+                    <p class="text-gray-300 text-sm md:text-base">Sigue cada combate, rutina, transmisión en vivo y resultados oficiales en tiempo real.</p>
                 </div>
             </div>
 
-            <!-- Grilla de Eventos/Campeonatos -->
-            <div>
-                <h3 class="text-xl font-bold uppercase tracking-wider text-white mb-4 flex items-center"><i class="fa-solid fa-trophy text-mmcGold mr-2"></i> Competencias Registradas</h3>
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold uppercase tracking-wider text-white flex items-center"><i class="fa-solid fa-fire text-mmcGold mr-2"></i> Competencias Registradas</h3>
                 <div id="championships-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Los eventos cargados desde Google Sheets se insertarán aquí dinámicamente -->
-                    <div class="animate-pulse bg-mmcCard border border-mmcBorder rounded-xl h-64"></div>
+                    <!-- Dinámico -->
                 </div>
             </div>
         </section>
 
-        <!-- Vista 2: SANSHOU (Sanda) -->
+        <!-- Vista 2: SANSHOU -->
         <section id="view-sanda" class="view-section hidden space-y-6">
-            <!-- Transmisión En Vivo + Marcador de Combate -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Video Transmisión -->
-                <div class="lg:col-span-2 bg-black rounded-xl border border-mmcBorder overflow-hidden relative min-h-[260px] md:min-h-[380px] flex items-center justify-center">
-                    <iframe id="sanda-stream" class="w-full h-full absolute inset-0" src="" frameborder="0" allowfullscreen></iframe>
-                    <div id="sanda-stream-placeholder" class="text-center p-6 text-gray-500">
-                        <i class="fa-solid fa-video-slash text-4xl mb-2"></i>
-                        <p class="text-sm">Sin transmisión en vivo configurada para esta categoría.</p>
-                    </div>
+                <div class="lg:col-span-2 bg-black rounded-xl border border-mmcBorder overflow-hidden relative min-h-[300px] flex items-center justify-center">
+                    <p class="text-gray-400 text-sm">Transmisión de Sanshou en vivo</p>
                 </div>
-
-                <!-- Marcador y Cronómetro Sanda -->
                 <div class="bg-mmcCard border border-mmcBorder rounded-xl p-5 flex flex-col justify-between space-y-4">
                     <div class="text-center border-b border-mmcBorder pb-3">
-                        <span id="sanda-match-category" class="text-xs text-mmcGold font-bold uppercase tracking-wider">Sanda Avanzado Femenino -56kg</span>
-                        <h4 id="sanda-match-round" class="text-lg font-black text-white uppercase">Cuartos de Final</h4>
+                        <span class="text-xs text-mmcGold font-bold uppercase tracking-wider">Sanda Avanzado Femenino -56kg</span>
+                        <h4 class="text-lg font-black text-white uppercase">Cuartos de Final</h4>
                     </div>
-
-                    <!-- Esquinas Roja vs Azul -->
-                    <div class="grid grid-cols-2 gap-3 text-center">
-                        <div class="bg-red-950/40 border border-red-600/40 rounded-lg p-3">
-                            <span class="text-[10px] font-bold text-red-400 uppercase tracking-widest block mb-1">Esquina Roja</span>
-                            <p id="sanda-red-name" class="font-black text-sm text-white truncate">MARYCIELO MATIAS</p>
-                            <span id="sanda-red-team" class="text-xs text-gray-400">MMC</span>
-                        </div>
-                        <div class="bg-blue-950/40 border border-blue-600/40 rounded-lg p-3">
-                            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">Esquina Azul</span>
-                            <p id="sanda-blue-name" class="font-black text-sm text-white truncate">SANDRA CALIXTO</p>
-                            <span id="sanda-blue-team" class="text-xs text-gray-400">UPCH</span>
-                        </div>
-                    </div>
-
-                    <!-- Cronómetro -->
                     <div class="text-center bg-black/60 rounded-xl p-4 border border-mmcBorder">
-                        <span id="sanda-timer" class="font-mono text-4xl md:text-5xl font-black text-white">02:00</span>
+                        <span id="sanda-timer" class="font-mono text-4xl font-black text-white">02:00</span>
                         <div class="flex justify-center space-x-2 mt-3">
-                            <button onclick="toggleTimer()" id="timer-btn" class="bg-mmcGold hover:bg-yellow-500 text-black font-bold px-4 py-1.5 rounded-lg text-xs uppercase"><i class="fa-solid fa-play mr-1"></i> Iniciar</button>
-                            <button onclick="resetTimer()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-3 py-1.5 rounded-lg text-xs uppercase"><i class="fa-solid fa-rotate-right"></i></button>
+                            <button onclick="toggleTimer()" id="timer-btn" class="bg-mmcGold hover:bg-yellow-500 text-black font-bold px-4 py-1.5 rounded-lg text-xs uppercase">Iniciar</button>
+                            <button onclick="resetTimer()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-3 py-1.5 rounded-lg text-xs uppercase">Reiniciar</button>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Sección de Llaves de Eliminación -->
-            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6">
-                <div class="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-mmcBorder">
-                    <h3 class="text-lg font-bold text-white uppercase"><i class="fa-solid fa-sitemap text-mmcGold mr-2"></i> Llaves de Eliminación</h3>
-                    <div id="sanda-filters" class="flex flex-wrap gap-2">
-                        <!-- Filtros de categoría de Sanda -->
-                    </div>
-                </div>
-                <div id="sanda-bracket-container" class="overflow-x-auto min-h-[300px]">
-                    <!-- Cuadro interactivo de llaves -->
                 </div>
             </div>
         </section>
 
         <!-- Vista 3: TAOLU -->
         <section id="view-taolu" class="view-section hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Streaming Taolu -->
-                <div class="lg:col-span-2 bg-black rounded-xl border border-mmcBorder overflow-hidden relative min-h-[260px] md:min-h-[380px] flex items-center justify-center">
-                    <iframe id="taolu-stream" class="w-full h-full absolute inset-0" src="" frameborder="0" allowfullscreen></iframe>
-                </div>
-
-                <!-- Tarjeta del Deportista en Ejecución -->
-                <div class="bg-mmcCard border border-mmcBorder rounded-xl p-5 space-y-4">
-                    <span class="text-xs text-mmcGold font-bold uppercase tracking-wider block text-center">Atleta en Rutina</span>
-                    <div class="text-center space-y-2">
-                        <div id="taolu-current-avatar" class="w-20 h-20 bg-slate-800 rounded-full mx-auto border-2 border-mmcGold flex items-center justify-center overflow-hidden">
-                            <i class="fa-solid fa-user text-3xl text-gray-500"></i>
-                        </div>
-                        <h4 id="taolu-current-name" class="font-black text-lg text-white">Selecciona un Competidor</h4>
-                        <p id="taolu-current-team" class="text-xs text-gray-400">---</p>
-                    </div>
-
-                    <div class="bg-black/60 rounded-xl p-4 border border-mmcBorder text-center">
-                        <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Puntaje Final</span>
-                        <span id="taolu-current-score" class="font-mono text-4xl font-black text-mmcGold">0.000</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabla Orden de Salida -->
-            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6">
-                <h3 class="text-lg font-bold text-white uppercase mb-4"><i class="fa-solid fa-list-ol text-mmcGold mr-2"></i> Orden de Salida - Taolu</h3>
-                <div id="taolu-list-container" class="overflow-x-auto">
-                    <!-- Lista cargada desde Excel -->
-                </div>
+            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 text-center">
+                <h3 class="text-xl font-bold text-white uppercase mb-4">Taolu - Órdenes de Salida</h3>
+                <p class="text-gray-400 text-sm">Listado de deportistas y puntajes en tiempo real.</p>
             </div>
         </section>
 
-        <!-- Vista 4: MEDALLERO POR ESCUELAS -->
+        <!-- Vista 4: MEDALLERO -->
         <section id="view-medallero" class="view-section hidden space-y-6">
             <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6">
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-mmcBorder">
-                    <h3 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-medal text-mmcGold mr-2"></i> Medallero por Escuelas</h3>
-                    <span class="text-xs text-gray-400">Actualización automática</span>
-                </div>
+                <h3 class="text-xl font-bold text-white uppercase mb-4">Medallero por Escuelas</h3>
                 <div id="medallero-table-container" class="overflow-x-auto">
-                    <!-- Tabla del Medallero -->
+                    <!-- Dinámico -->
                 </div>
             </div>
         </section>
     </main>
 
     <!-- Bottom Navigation Bar para Celulares (Android/iOS) -->
-    <nav class="md:hidden bg-mmcCard border-t border-mmcBorder fixed bottom-0 left-0 right-0 z-50 flex justify-around py-2 text-xs">
-        <button onclick="switchView('home')" class="flex flex-col items-center text-mmcGold"><i class="fa-solid fa-house text-lg mb-0.5"></i>Inicio</button>
-        <button onclick="switchView('sanda')" class="flex flex-col items-center text-gray-400"><i class="fa-solid fa-hand-fist text-lg mb-0.5"></i>Sanshou</button>
-        <button onclick="switchView('taolu')" class="flex flex-col items-center text-gray-400"><i class="fa-solid fa-person-swimming text-lg mb-0.5"></i>Taolu</button>
-        <button onclick="switchView('medallero')" class="flex flex-col items-center text-gray-400"><i class="fa-solid fa-trophy text-lg mb-0.5"></i>Medallero</button>
+    <nav class="md:hidden bg-mmcCard border-t border-mmcBorder fixed bottom-0 left-0 right-0 z-50 flex justify-around py-3 text-xs shadow-lg">
+        <button onclick="switchView('home')" id="mob-home" class="mob-btn flex flex-col items-center text-mmcGold font-bold"><i class="fa-solid fa-house text-lg mb-1"></i>Inicio</button>
+        <button onclick="switchView('sanda')" id="mob-sanda" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-hand-fist text-lg mb-1"></i>Sanshou</button>
+        <button onclick="switchView('taolu')" id="mob-taolu" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-person-swimming text-lg mb-1"></i>Taolu</button>
+        <button onclick="switchView('medallero')" id="mob-medallero" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-trophy text-lg mb-1"></i>Medallero</button>
     </nav>
+
+    <script src="app.js"></script>
 </body>
 </html>

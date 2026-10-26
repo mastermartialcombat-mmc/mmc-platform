@@ -1,6 +1,7 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Reemplaza con tu URL real
+const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Asegúrate de mantener tu URL real de Apps Script
 
 let championshipData = [];
+let taoluData = [];
 let medalleroData = [];
 
 function switchView(viewName) {
@@ -13,9 +14,19 @@ function switchView(viewName) {
         btn.classList.add('text-gray-300');
     });
     const activeNav = document.getElementById(`nav-${viewName}`);
-    if (activeNav) {
-        activeNav.classList.add('text-mmcGold', 'bg-mmcBorder/50');
+    if (activeNav) activeNav.classList.add('text-mmcGold', 'bg-mmcBorder/50');
+
+    document.querySelectorAll('.mob-btn').forEach(btn => {
+        btn.classList.remove('text-mmcGold', 'font-bold');
+        btn.classList.add('text-gray-400');
+    });
+    const activeMob = document.getElementById(`mob-${viewName}`);
+    if (activeMob) {
+        activeMob.classList.remove('text-gray-400');
+        activeMob.classList.add('text-mmcGold', 'font-bold');
     }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function loadAllData() {
@@ -23,6 +34,10 @@ async function loadAllData() {
         const resChamp = await fetch(`${API_URL}?sheet=Championship`);
         championshipData = await resChamp.json();
         renderChampionships(championshipData);
+
+        const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
+        taoluData = await resTaolu.json();
+        renderTaoluTable(taoluData);
 
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
         medalleroData = await resMedall.json();
@@ -37,22 +52,89 @@ function renderChampionships(data) {
     if (!container) return;
 
     if (!data || data.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 col-span-full">No se encontraron campeonatos registrados en el Excel.</p>`;
+        container.innerHTML = `<p class="text-gray-400 col-span-full">No se encontraron campeonatos en el Excel.</p>`;
         return;
     }
 
-    container.innerHTML = data.map(item => `
-        <div class="bg-mmcCard border border-mmcBorder hover:border-mmcGold transition rounded-xl p-5 flex flex-col justify-between space-y-4 shadow-xl">
-            <div class="space-y-2">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${item.Estado_Competencia || 'EN CURSO'}</span>
-                <h4 class="text-lg font-black text-white">${item.Nombre_Campeonato}</h4>
-                <p class="text-xs text-gray-400 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-mmcGold"></i> ${item.Sede || 'Lima, Perú'}</p>
+    container.innerHTML = data.map(item => {
+        const nombre = item.Nombre_Campeonato || item.nombre_campeonato || "Campeonato Wushu";
+        const sede = item.Sede || item.sede || "Lima, Perú";
+        const estado = item.Estado_Competencia || item.estado_competencia || "EN CURSO";
+
+        return `
+            <div class="bg-mmcCard border border-mmcBorder hover:border-mmcGold transition rounded-xl p-5 flex flex-col justify-between space-y-4 shadow-xl">
+                <div class="space-y-2">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${estado}</span>
+                    <h4 class="text-lg font-black text-white">${nombre}</h4>
+                    <p class="text-xs text-gray-400 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-mmcGold"></i> ${sede}</p>
+                </div>
+                <button onclick="switchView('sanda')" class="w-full bg-mmcGold hover:bg-yellow-500 text-black font-black py-2 rounded-lg text-xs uppercase tracking-wider transition shadow">
+                    ENTRAR A LA COMPETENCIA <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
             </div>
-            <button onclick="switchView('sanda')" class="w-full bg-mmcGold hover:bg-yellow-500 text-black font-black py-2 rounded-lg text-xs uppercase tracking-wider transition shadow">
-                ENTRAR A LA COMPETENCIA <i class="fa-solid fa-arrow-right ml-1"></i>
-            </button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+function renderTaoluTable(data) {
+    const container = document.getElementById('taolu-table-container');
+    if (!container) return;
+
+    if (!data || data.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay registros de Taolu disponibles.</p>`;
+        return;
+    }
+
+    container.innerHTML = `
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-900 text-gray-400 uppercase text-[11px] border-b border-mmcBorder">
+                <tr>
+                    <th class="py-3 px-4">Orden</th>
+                    <th class="py-3 px-4">Deportista</th>
+                    <th class="py-3 px-4">Escuela</th>
+                    <th class="py-3 px-4">Forma / Código</th>
+                    <th class="py-3 px-4 text-center">Género / Nivel</th>
+                    <th class="py-3 px-4 text-center">Estado</th>
+                    <th class="py-3 px-4 text-right">Puntaje</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-mmcBorder">
+                ${data.map((row, idx) => {
+                    const nombre = row.Nombre_Completo || row.nombre_completo || "Competidor";
+                    const escuela = row.Siglas_Escuela || row.siglas_escuela || "MMC";
+                    const forma = row.Nombre_Forma || row.nombre_forma || "Chang Quan";
+                    const codigo = row.Codigo_Forma || row.codigo_forma || "CQ1";
+                    const genero = row.Genero || row.genero || "";
+                    const nivel = row.Nivel || row.nivel || "";
+                    const puntaje = row.Puntaje_Final || row.puntaje_final || "0.00";
+                    const estado = row.Estado || row.estado || "PENDIENTE";
+                    const orden = row.Orden_Salida || row.orden_salida || (idx + 1);
+
+                    return `
+                        <tr onclick="selectTaoluAtleta('${nombre}', '${forma} (${codigo})', '${puntaje}')" class="hover:bg-slate-800/60 cursor-pointer transition">
+                            <td class="py-3 px-4 font-bold text-mmcGold">${orden}</td>
+                            <td class="py-3 px-4 font-bold text-white">${nombre}</td>
+                            <td class="py-3 px-4 text-gray-300">${escuela}</td>
+                            <td class="py-3 px-4"><span class="bg-slate-800 px-2 py-1 rounded text-xs text-mmcGold font-mono">${forma} [${codigo}]</span></td>
+                            <td class="py-3 px-4 text-center text-xs text-gray-400">${genero} / ${nivel}</td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${estado === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
+                                    ${estado}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-right font-black text-mmcGold">${puntaje}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function selectTaoluAtleta(nombre, forma, puntaje) {
+    document.getElementById('taolu-selected-name').innerText = nombre;
+    document.getElementById('taolu-selected-forma').innerText = forma;
+    document.getElementById('taolu-selected-score').innerText = puntaje;
 }
 
 function renderMedallero(data) {
@@ -61,7 +143,7 @@ function renderMedallero(data) {
 
     const totals = {};
     data.forEach(row => {
-        const esc = row.Nombre_Escuela || 'Independiente';
+        const esc = row.Nombre_Escuela || row.nombre_escuela || 'Independiente';
         if (!totals[esc]) totals[esc] = { esc, oro: 0, plata: 0, bronce: 0, puntos: 0 };
         if (row.ID_Puesto === 'M-1') totals[esc].oro += 1;
         if (row.ID_Puesto === 'M-2') totals[esc].plata += 1;
@@ -106,7 +188,7 @@ function toggleTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
-        btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Reanudar`;
+        btn.innerText = "Iniciar";
     } else {
         timerInterval = setInterval(() => {
             if (seconds > 0) {
@@ -119,7 +201,7 @@ function toggleTimer() {
                 timerInterval = null;
             }
         }, 1000);
-        btn.innerHTML = `<i class="fa-solid fa-pause mr-1"></i> Pausar`;
+        btn.innerText = "Pausar";
     }
 }
 function resetTimer() {
@@ -127,7 +209,7 @@ function resetTimer() {
     timerInterval = null;
     seconds = 120;
     document.getElementById('sanda-timer').innerText = `02:00`;
-    document.getElementById('timer-btn').innerHTML = `<i class="fa-solid fa-play mr-1"></i> Iniciar`;
+    document.getElementById('timer-btn').innerText = "Iniciar";
 }
 
 document.addEventListener('DOMContentLoaded', loadAllData);
