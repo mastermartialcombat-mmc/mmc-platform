@@ -129,6 +129,9 @@ function renderChampionships(data) {
 
     container.innerHTML = data.map(item => {
         const nombre = item.Nombre_Campeonato || item.nombre_campeonato || "Campeonato Wushu";
+        const deptYear = item.Departamento_Year || item.departamento_year || "";
+        const fechaInicio = item.Fecha_Inicio || item.fecha_inicio || "";
+        const fechaFin = item.Fecha_Fin || item.fecha_fin || "";
         const sede = item.Sede || item.sede || "Lima, Perú";
         const estado = (item.Estado_Competencia || item.estado_competencia || "PRÓXIMAMENTE").trim().toUpperCase();
         const bannerUrl = convertToDirectDriveUrl(item.Banner_URL || item.banner_url || "");
@@ -140,14 +143,21 @@ function renderChampionships(data) {
             badgeClass = "bg-slate-700 text-gray-300 border-slate-600";
         }
 
+        const fechaStr = (fechaInicio && fechaFin) ? `${fechaInicio} - ${fechaFin}` : (fechaInicio || fechaFin || "");
+
         return `
-            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[320px] flex flex-col justify-end p-6 bg-slate-900">
+            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[340px] flex flex-col justify-end p-6 bg-slate-900">
                 ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-950"></div>`}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20"></div>
                 <div class="relative z-10 space-y-3">
                     <span class="text-[10px] font-black px-3 py-1 rounded-full border ${badgeClass} uppercase tracking-wider inline-block shadow">${estado}</span>
-                    <h4 class="text-xl font-black text-white leading-tight drop-shadow-md">${nombre}</h4>
-                    <p class="text-xs text-gray-300 flex items-center font-medium"><i class="fa-solid fa-location-dot mr-1.5 text-mmcGold"></i> ${sede}</p>
+                    <h4 class="text-xl font-black text-white leading-tight drop-shadow-md">
+                        ${nombre} ${deptYear ? `<span class="text-mmcGold font-extrabold ml-1">(${deptYear})</span>` : ''}
+                    </h4>
+                    <div class="space-y-1 text-xs text-gray-300 font-medium">
+                        ${fechaStr ? `<p class="flex items-center"><i class="fa-regular fa-calendar mr-2 text-mmcGold"></i> ${fechaStr}</p>` : ''}
+                        <p class="flex items-center"><i class="fa-solid fa-location-dot mr-2 text-mmcGold"></i> ${sede}</p>
+                    </div>
                     <button onclick="switchView('sanda')" class="w-full mt-2 bg-mmcGold hover:bg-yellow-600 text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg flex items-center justify-center space-x-2">
                         <span>Ingresar a la Competencia</span>
                         <i class="fa-solid fa-arrow-right"></i>
