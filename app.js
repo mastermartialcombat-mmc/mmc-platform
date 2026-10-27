@@ -4,7 +4,7 @@ const LOGO_DORADO_URL = "https://drive.google.com/file/d/127ufDGHvGnuYGPtvRb3K5S
 
 const FONDO_ROJA_URL = "https://drive.google.com/file/d/19XJR7ZobDCXDTe8S3Dsq3EF50emXlz_Q/view?usp=drive_link";
 const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3LHiO8tFjV/view?usp=drive_link";
-const FONDO_TAOLU_DORADA_URL = "https://drive.google.com/file/d/175X5Yl1yJD2QnXERooOkLRb3bAqcKXFm/view?usp=drive_link";
+const FONDO_TAOLU_AZUL_PLATINADA_URL = "https://drive.google.com/file/d/1NpeYVotYxB-Kr0mglU4IgiI3MROQRPZ8/view?usp=drive_link";
 
 let championshipData = [];
 let sandaData = [];
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const taoluAvatar = document.getElementById('taolu-avatar-container');
     if (taoluAvatar) {
-        taoluAvatar.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_TAOLU_DORADA_URL)}')`;
+        taoluAvatar.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_TAOLU_AZUL_PLATINADA_URL)}')`;
     }
 
     loadAllData();
@@ -685,7 +685,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO (CON PUESTO URL Y FONDO DORADO)
+// MÓDULO TAOLU Y MEDALLERO
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -726,7 +726,7 @@ function renderTaoluGroups(data) {
         htmlContent += `
             <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
                 <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
-                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold"><i class="fa-solid fa-khanda mr-2"></i> ${grupoName}</h4>
+                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center"><svg class="w-4 h-4 fill-current mr-2 text-mmcGold inline-block" viewBox="0 0 24 24"><path d="M21.71 3.29a1 1 0 0 0-1.42 0l-4.15 4.15a1 1 0 0 0-.27.54l-.79 3.93a1 1 0 0 0 1.18 1.18l3.93-.79a1 1 0 0 0 .54-.27l4.15-4.15a1 1 0 0 0 0-1.42M14.5 9.5l-6 6-3-3 6-6M3 19l2 2 3-3-2-2z"/></svg> ${grupoName}</h4>
                     <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -762,16 +762,21 @@ function renderTaoluGroups(data) {
                                             ${fotoUrl ? `<img src="${fotoUrl}" class="w-8 h-8 rounded-full object-cover border border-mmcGold shadow">` : `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-user"></i></div>`}
                                             <span>${nombre}</span>
                                         </td>
-                                        <td class="py-3.5 px-3 text-slate-700 font-bold text-xs">${escuela}</td>
+                                        <td class="py-3.5 px-3 text-slate-700 font-bold text-xs flex items-center space-x-2">
+                                            ${logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-5 h-5 object-contain flex-shrink-0" alt="Logo">` : ''}
+                                            <span>${escuela}</span>
+                                        </td>
                                         <td class="py-3.5 px-3 text-center text-xs text-slate-600">${genero} / ${nivel}</td>
                                         <td class="py-3.5 px-3 text-center">
                                             <span class="px-2.5 py-1 rounded text-[10px] font-black ${estado === 'FINALIZADO' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
                                                 ${estado}
                                             </span>
                                         </td>
-                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-base flex items-center justify-end space-x-2">
-                                            <span>${puntaje}</span>
-                                            ${puestoUrl ? `<img src="${puestoUrl}" class="w-6 h-6 object-contain inline-block drop-shadow" alt="Medalla">` : ''}
+                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-base">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                ${puestoUrl ? `<img src="${puestoUrl}" class="w-6 h-6 object-contain inline-block drop-shadow" alt="Medalla">` : ''}
+                                                <span>${puntaje}</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 `;
