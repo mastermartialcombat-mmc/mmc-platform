@@ -12,7 +12,8 @@ let llavesSandaDataRaw = [];
 let taoluDataRaw = [];
 let medalleroDataRaw = [];
 
-let currentActiveChampionship = null;
+let currentActiveChampId = null;
+let currentActiveChampName = null;
 let currentActiveLlave = null;
 let currentCategoryFiltered = "";
 let playerTimeouts = {};
@@ -25,6 +26,22 @@ function convertToDirectDriveUrl(url) {
         return `https://lh3.googleusercontent.com/d/${match[1]}`;
     }
     return url;
+}
+
+function formatDateOnly(str) {
+    if (!str) return '';
+    let clean = str.toString().trim();
+    if (clean.includes('T')) {
+        clean = clean.split('T')[0];
+    }
+    const parts = clean.split('-');
+    if (parts.length === 3) {
+        const [y, m, d] = parts;
+        const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
+        const monthName = months[parseInt(m, 10) - 1] || m;
+        return `${parseInt(d, 10)} ${monthName} ${y}`;
+    }
+    return clean;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,12 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function switchView(viewName) {
     if (viewName === 'home') {
-        currentActiveChampionship = null;
+        currentActiveChampId = null;
+        currentActiveChampName = null;
         const badge = document.getElementById('active-championship-badge');
         if (badge) badge.classList.add('hidden');
     } else {
-        if (!currentActiveChampionship && championshipData.length > 0) {
-            currentActiveChampionship = championshipData[0].Nombre_Campeonato || championshipData[0].nombre_campeonato;
+        if (!currentActiveChampId && championshipData.length > 0) {
+            const first = championshipData[0];
+            currentActiveChampId = first.ID_Championship || first.id_championship || "";
+            currentActiveChampName = first.Nombre_Campeonato || first.nombre_campeonato || "";
         }
     }
 
@@ -105,46 +125,70 @@ async function loadAllData() {
     }
 }
 
-function selectChampionship(nombreCampeonato) {
-    currentActiveChampionship = nombreCampeonato;
+function selectChampionship(champId, nombreCampeonato) {
+    currentActiveChampId = (champId || "").toString().trim();
+    currentActiveChampName = (nombreCampeonato || "").toString().trim();
 
     const badge = document.getElementById('active-championship-badge');
     const headerName = document.getElementById('header-champ-name');
     const sandaTitleBadge = document.getElementById('current-champ-title-sanda');
 
     if (badge && headerName) {
-        headerName.innerText = nombreCampeonato;
+        headerName.innerText = currentActiveChampName;
         badge.classList.remove('hidden');
         badge.classList.add('flex');
     }
     if (sandaTitleBadge) {
-        sandaTitleBadge.innerText = nombreCampeonato;
+        sandaTitleBadge.innerText = currentActiveChampName;
     }
 
-    const activeChampObj = championshipData.find(c => (c.Nombre_Campeonato || c.nombre_campeonato) === nombreCampeonato) || championshipData[0] || {};
+    const activeChampObj = championshipData.find(c => {
+        const cId = (c.ID_Championship || c.id_championship || "").toString().trim();
+        const cName = (c.Nombre_Campeonato || c.nombre_campeonato || "").toString().trim();
+        return (currentActiveChampId && cId.toLowerCase() === currentActiveChampId.toLowerCase()) || 
+               (cName.toLowerCase() === currentActiveChampName.toLowerCase());
+    }) || championshipData[0] || {};
+
     setupStreamsForChamp(activeChampObj);
 
+    // Filtrar Sanda por ID_Championship o Nombre_Campeonato
     const filteredSanda = sandaDataRaw.filter(row => {
-        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+        const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+        const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+        if (currentActiveChampId) {
+            return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+        }
+        return rName.toLowerCase() === currentActiveChampName.toLowerCase();
     });
 
     const filteredLlaves = llavesSandaDataRaw.filter(row => {
-        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+        const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+        const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+        if (currentActiveChampId) {
+            return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+        }
+        return rName.toLowerCase() === currentActiveChampName.toLowerCase();
     });
 
     initSandaModule(filteredSanda, filteredLlaves);
 
     const filteredTaolu = taoluDataRaw.filter(row => {
-        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+        const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+        const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+        if (currentActiveChampId) {
+            return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+        }
+        return rName.toLowerCase() === currentActiveChampName.toLowerCase();
     });
     renderTaoluGroups(filteredTaolu);
 
     const filteredMedallero = medalleroDataRaw.filter(row => {
-        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+        const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+        const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+        if (currentActiveChampId) {
+            return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+        }
+        return rName.toLowerCase() === currentActiveChampName.toLowerCase();
     });
     renderMedalleroAndPodium(filteredMedallero);
     renderGeneralDeportistasFromMedallero(filteredMedallero);
@@ -159,17 +203,23 @@ async function syncTaoluData() {
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
         medalleroDataRaw = await resMedall.json();
 
-        const activeChamp = currentActiveChampionship || (championshipData[0] ? (championshipData[0].Nombre_Campeonato || championshipData[0].nombre_campeonato) : "");
-
         const filteredTaolu = taoluDataRaw.filter(row => {
-            const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-            return !champ || champ.toLowerCase() === activeChamp.toLowerCase();
+            const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+            const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+            if (currentActiveChampId) {
+                return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+            }
+            return rName.toLowerCase() === currentActiveChampName.toLowerCase();
         });
         renderTaoluGroups(filteredTaolu);
 
         const filteredMedallero = medalleroDataRaw.filter(row => {
-            const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-            return !champ || champ.toLowerCase() === activeChamp.toLowerCase();
+            const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+            const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+            if (currentActiveChampId) {
+                return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+            }
+            return rName.toLowerCase() === currentActiveChampName.toLowerCase();
         });
         renderMedalleroAndPodium(filteredMedallero);
         renderGeneralDeportistasFromMedallero(filteredMedallero);
@@ -191,10 +241,11 @@ function renderChampionships(data) {
     }
 
     container.innerHTML = data.map(item => {
+        const champId = item.ID_Championship || item.id_championship || "";
         const nombre = item.Nombre_Campeonato || item.nombre_campeonato || "Campeonato Wushu";
         const deptYear = item.Departamento_Year || item.departamento_year || "";
-        const fechaInicio = item.Fecha_Inicio || item.fecha_inicio || "";
-        const fechaFin = item.Fecha_Fin || item.fecha_fin || "";
+        const fechaInicio = formatDateOnly(item.Fecha_Inicio || item.fecha_inicio || "");
+        const fechaFin = formatDateOnly(item.Fecha_Fin || item.fecha_fin || "");
         const sede = item.Sede || item.sede || "Lima, Perú";
         const estado = (item.Estado_Competencia || item.estado_competencia || "PRÓXIMAMENTE").trim().toUpperCase();
         const bannerUrl = convertToDirectDriveUrl(item.Banner_URL || item.banner_url || "");
@@ -209,7 +260,7 @@ function renderChampionships(data) {
         const fechaStr = (fechaInicio && fechaFin) ? `${fechaInicio} - ${fechaFin}` : (fechaInicio || fechaFin || "");
 
         return `
-            <div onclick="selectChampionship('${nombre.replace(/'/g, "\\'")}')" class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[340px] flex flex-col justify-end p-6 bg-slate-900 cursor-pointer hover:border-mmcGold transition-all duration-300">
+            <div onclick="selectChampionship('${champId.replace(/'/g, "\\'")}', '${nombre.replace(/'/g, "\\'")}')" class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[340px] flex flex-col justify-end p-6 bg-slate-900 cursor-pointer hover:border-mmcGold transition-all duration-300">
                 ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-950"></div>`}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20"></div>
                 <div class="relative z-10 space-y-3">
@@ -383,7 +434,8 @@ function initSandaModule(filteredSanda, filteredLlaves) {
     const catKeys = Object.keys(categories);
     if (catKeys.length === 0) {
         selectEl.innerHTML = `<option value="">No hay categorías en este campeonato</option>`;
-        document.getElementById('tournament-brackets-container.innerHTML') = "";
+        const bracketCont = document.getElementById('tournament-brackets-container');
+        if (bracketCont) bracketCont.innerHTML = `<p class="text-xs text-slate-500 font-bold col-span-full">No hay llaves registradas para esta categoría.</p>`;
         return;
     }
 
@@ -621,10 +673,13 @@ async function syncMatchData() {
         const res = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
         llavesSandaDataRaw = await res.json();
         
-        const activeChamp = currentActiveChampionship || "";
         activeFilteredLlaves = llavesSandaDataRaw.filter(row => {
-            const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
-            return !champ || champ.toLowerCase() === activeChamp.toLowerCase();
+            const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
+            const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
+            if (currentActiveChampId) {
+                return rId.toLowerCase() === currentActiveChampId.toLowerCase();
+            }
+            return rName.toLowerCase() === currentActiveChampName.toLowerCase();
         });
 
         updateRoundCirclesFromSheets();
