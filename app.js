@@ -685,7 +685,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO
+// MÓDULO TAOLU Y MEDALLERO (TABLA CUADRADA Y ORDENADA)
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -726,11 +726,19 @@ function renderTaoluGroups(data) {
         htmlContent += `
             <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
                 <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
-                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center"><svg class="w-4 h-4 fill-current mr-2 text-mmcGold inline-block" viewBox="0 0 24 24"><path d="M21.71 3.29a1 1 0 0 0-1.42 0l-4.15 4.15a1 1 0 0 0-.27.54l-.79 3.93a1 1 0 0 0 1.18 1.18l3.93-.79a1 1 0 0 0 .54-.27l4.15-4.15a1 1 0 0 0 0-1.42M14.5 9.5l-6 6-3-3 6-6M3 19l2 2 3-3-2-2z"/></svg> ${grupoName}</h4>
+                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center"><svg class="w-4 h-4 fill-current mr-2 text-mmcGold inline-block" viewBox="0 0 24 24"><path d="M6.5 2c-.3 0-.5.1-.7.3l-3.5 3.5c-.4.4-.4 1 0 1.4l2.1 2.1L1.1 12.5c-.4.4-.4 1 0 1.4l3.5 3.5c.4.4 1 .4 1.4 0l3.5-3.5c.4-.4.4-1 0-1.4L7.4 10.9l2.1-2.1c.4-.4.4-1 0-1.4L6 3.9c-.2-.2-.4-.3-.7-.3m11 2c-.3 0-.5.1-.7.3l-3.5 3.5c-.4.4-.4 1 0 1.4l2.1 2.1-3.5 3.5c-.4.4-.4 1 0 1.4l3.5 3.5c.4.4 1 .4 1.4 0l3.5-3.5c.4-.4.4-1 0-1.4l-2.1-2.1 2.1-2.1c.4-.4.4-1 0-1.4l-3.5-3.5c-.2-.2-.4-.3-.7-.3M6.5 4.8l2.1 2.1-2.1 2.1L4.4 6.9zM18 16.2l2.1 2.1-2.1 2.1-2.1-2.1z"/></svg> ${grupoName}</h4>
                     <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table class="w-full text-left text-sm table-fixed">
+                        <colgroup>
+                            <col style="width: 10%;">
+                            <col style="width: 32%;">
+                            <col style="width: 18%;">
+                            <col style="width: 18%;">
+                            <col style="width: 12%;">
+                            <col style="width: 10%;">
+                        </colgroup>
                         <thead class="bg-slate-100 text-slate-700 uppercase text-[10px] border-b border-slate-300 font-extrabold">
                             <tr>
                                 <th class="py-3 px-3">Orden</th>
@@ -758,23 +766,25 @@ function renderTaoluGroups(data) {
                                 return `
                                     <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}', '${escuela}', '${nombreEscuela}', '${logoEscuelaUrl}')" class="hover:bg-slate-100 cursor-pointer transition font-medium">
                                         <td class="py-3.5 px-3 font-extrabold text-amber-700">${orden}</td>
-                                        <td class="py-3.5 px-3 font-bold text-slate-900 flex items-center space-x-2.5">
-                                            ${fotoUrl ? `<img src="${fotoUrl}" class="w-8 h-8 rounded-full object-cover border border-mmcGold shadow">` : `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-user"></i></div>`}
-                                            <span>${nombre}</span>
+                                        <td class="py-3.5 px-3 font-bold text-slate-900 flex items-center space-x-2.5 truncate">
+                                            ${fotoUrl ? `<img src="${fotoUrl}" class="w-8 h-8 rounded-full object-cover border border-mmcGold shadow flex-shrink-0">` : `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 flex-shrink-0"><i class="fa-solid fa-user"></i></div>`}
+                                            <span class="truncate">${nombre}</span>
                                         </td>
-                                        <td class="py-3.5 px-3 text-slate-700 font-bold text-xs flex items-center space-x-2">
-                                            ${logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-5 h-5 object-contain flex-shrink-0" alt="Logo">` : ''}
-                                            <span>${escuela}</span>
+                                        <td class="py-3.5 px-3 text-slate-700 font-bold text-xs">
+                                            <div class="flex items-center space-x-1.5 truncate">
+                                                ${logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-5 h-5 object-contain flex-shrink-0" alt="Logo">` : ''}
+                                                <span class="truncate">${escuela}</span>
+                                            </div>
                                         </td>
-                                        <td class="py-3.5 px-3 text-center text-xs text-slate-600">${genero} / ${nivel}</td>
+                                        <td class="py-3.5 px-3 text-center text-xs text-slate-600 truncate">${genero} / ${nivel}</td>
                                         <td class="py-3.5 px-3 text-center">
-                                            <span class="px-2.5 py-1 rounded text-[10px] font-black ${estado === 'FINALIZADO' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-black inline-block ${estado === 'FINALIZADO' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
                                                 ${estado}
                                             </span>
                                         </td>
-                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-base">
-                                            <div class="flex items-center justify-end space-x-2">
-                                                ${puestoUrl ? `<img src="${puestoUrl}" class="w-6 h-6 object-contain inline-block drop-shadow" alt="Medalla">` : ''}
+                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-sm">
+                                            <div class="flex items-center justify-end space-x-1.5">
+                                                ${puestoUrl ? `<img src="${puestoUrl}" class="w-5 h-5 object-contain inline-block drop-shadow flex-shrink-0" alt="Medalla">` : ''}
                                                 <span>${puntaje}</span>
                                             </div>
                                         </td>
@@ -808,7 +818,10 @@ function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl, siglasEscuela, nombr
     
     const avatarContainer = document.getElementById('taolu-avatar-container');
     if (avatarContainer) {
-        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top z-10 relative">` : `<i class="fa-solid fa-user text-5xl text-gray-500 z-10 relative"></i>`;
+        avatarContainer.innerHTML = `
+            <div class="absolute inset-0 bg-black/60 z-0"></div>
+            ${fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top z-10 relative">` : `<i class="fa-solid fa-user text-5xl text-gray-400 z-10 relative"></i>`}
+        `;
     }
 
     const schoolLogoContainer = document.getElementById('taolu-school-logo');
