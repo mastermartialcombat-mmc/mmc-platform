@@ -90,7 +90,7 @@ async function loadAllData() {
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
         medalleroData = await resMedall.json();
         renderMedalleroAndPodium(medalleroData);
-        renderGeneralDeportistas(taoluData, medalleroData);
+        renderGeneralDeportistasFromMedallero(medalleroData);
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
         setupStreams([]);
@@ -106,12 +106,12 @@ async function syncTaoluData() {
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
         medalleroData = await resMedall.json();
         renderMedalleroAndPodium(medalleroData);
-        renderGeneralDeportistas(taoluData, medalleroData);
+        renderGeneralDeportistasFromMedallero(medalleroData);
 
-        alert("¡Puntajes y puestos de Taolu actualizados correctamente desde Google Sheets!");
+        alert("¡Puntajes y puestos actualizados correctamente desde Google Sheets!");
     } catch (err) {
-        console.error("Error al sincronizar Taolu:", err);
-        alert("Error al actualizar puntajes de Taolu.");
+        console.error("Error al sincronizar datos:", err);
+        alert("Error al actualizar puntajes.");
     }
 }
 
@@ -692,7 +692,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO (CON PODIO Y LISTA GENERAL)
+// MÓDULO TAOLU Y MEDALLERO
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -734,7 +734,7 @@ function renderTaoluGroups(data) {
             <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
                 <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
                     <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center">
-                        <svg class="w-4 h-4 fill-current mr-2 text-mmcGold inline-block" viewBox="0 0 512 512"><path d="M256 0c-14.3 0-27.6 7.6-35 20l-31 52c-15.5 26-6.4 59.5 19.6 75.1l11.7 7.1c-19.4 34.5-35.3 71.3-47.3 109.8C103.7 274.6 38.8 305.7 13.9 367.6c-10.2 25.3-.2 54.1 22.8 67.2l39 22.5c22.9 13.2 51.6 6.8 67.3-14.7 32.7-44.8 77.2-74.9 127-89.8 49.8 14.9 94.3 45 127 89.8 15.8 21.5 44.4 27.9 67.3 14.7l39-22.5c23-13.1 33-41.9 22.8-67.2-24.9-61.9-89.8-93-161.1-102.7-12-38.5-27.9-75.3-47.3-109.8l11.7-7.1c26-15.6 35.1-49.1 19.6-75.1l-31-52c-7.4-12.4-20.7-20-35-20s-27.6 7.6-35 20l-15.5 26.1c-22.1-4.7-44.8-4.7-66.9 0L291 20c-7.4-12.4-20.7-20-35-20zm-8.8 180.5c17.5-3.5 35.7-3.5 53.2 0 11.2 2.2 21.1 8.2 28.5 16.9l4.5 5.4c-28.7 19.3-60.6 30.7-95.3 33.5l4.5-5.4c7.4-8.7 17.3-14.7 28.5-16.9z"/></svg> 
+                        <i class="fa-solid fa-khanda text-mmcGold mr-2"></i> 
                         ${grupoName}
                     </h4>
                     <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
@@ -860,7 +860,6 @@ function renderMedalleroAndPodium(data) {
 
     const sorted = Object.values(totals).sort((a, b) => b.puntos - a.puntos);
 
-    // Renderizar Podio (Top 3)
     const top1 = sorted[0] || null;
     const top2 = sorted[1] || null;
     const top3 = sorted[2] || null;
@@ -891,7 +890,6 @@ function renderMedalleroAndPodium(data) {
         </div>
     `;
 
-    // Renderizar Tabla de Escuelas
     tableContainer.innerHTML = `
         <table class="w-full text-left text-sm">
             <thead class="bg-slate-900 text-gray-400 uppercase text-[11px] border-b border-mmcBorder">
@@ -926,12 +924,12 @@ function renderMedalleroAndPodium(data) {
     `;
 }
 
-function renderGeneralDeportistas(taoluRows, medalleroRows) {
+function renderGeneralDeportistasFromMedallero(medalleroRows) {
     const container = document.getElementById('general-deportistas-container');
     if (!container) return;
 
-    if (!taoluRows || taoluRows.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay deportistas registrados en el evento.</p>`;
+    if (!medalleroRows || medalleroRows.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay registros en la hoja Medallero.</p>`;
         return;
     }
 
@@ -947,13 +945,13 @@ function renderGeneralDeportistas(taoluRows, medalleroRows) {
                 </tr>
             </thead>
             <tbody class="divide-y divide-mmcBorder">
-                ${taoluRows.map(row => {
-                    const nombre = row.Nombre_Completo || row.nombre_completo || "Competidor";
-                    const escuela = row.Siglas_Escuela || row.siglas_escuela || "MMC";
+                ${medalleroRows.map(row => {
+                    const nombre = row.Nombre_Completo || row.nombre_completo || row.Deportista || "Competidor";
+                    const escuela = row.Siglas_Escuela || row.siglas_escuela || row.Siglas || "MMC";
                     const codigoForma = row.Codigo_Forma || row.codigo_forma || row.Codigo_Forma_Llave || "GEN";
                     const puestoNombre = row.Puesto_Nombre || row.puesto_nombre || row.Puesto || "Participante";
                     const puestoUrl = convertToDirectDriveUrl(row.Puesto_URL || row.puesto_url || "");
-                    const puntaje = row.Puntaje_Final || row.puntaje_final || "0.00";
+                    const puntaje = row.Puntaje || row.puntaje || "0.00";
 
                     return `
                         <tr class="hover:bg-slate-800/50 transition">
