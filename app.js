@@ -180,7 +180,6 @@ function filterSandaCategory(categoryName) {
 
     renderTournamentBracketsTree(filtered, llavesSandaData);
     
-    // Seleccionar por defecto la primera llave disponible en el marcador superior
     if (filtered.length > 0) {
         const pairs = {};
         filtered.forEach(row => {
@@ -214,7 +213,7 @@ function filterSandaCategory(categoryName) {
     }
 }
 
-// Renderizar Árbol de Llaves con Fases Dinámicas, Insignias de Medallas y Fondo Claro
+// Renderizar Árbol de Llaves con Fases Dinámicas, Ancho Estandarizado (310px) y Medallas Corregidas
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
@@ -281,7 +280,7 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const redClass = redDni ? (ganadorOficial === "AZUL" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
         const blueClass = blueDni ? (ganadorOficial === "ROJO" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
 
-        // Obtener Puesto y Medalla si aplica
+        // Obtener Puesto y URL de medalla con conversión correcta de Drive
         const redPuesto = redDni ? (r.Puesto_Nombre || r.puesto_nombre || "").trim() : "";
         const redMedallaUrl = redDni ? convertToDirectDriveUrl(r.Puesto_URL || r.puesto_url || "") : "";
 
@@ -305,25 +304,25 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         };
 
         return `
-            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-xl transition w-[270px] flex-shrink-0 my-3">
+            <div onclick='selectSandaMatch(${JSON.stringify(redObj)}, ${JSON.stringify(blueObj)}, ${JSON.stringify(llaveId)})' class="bg-white border-2 border-slate-300 hover:border-mmcGold cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-xl transition w-[310px] flex-shrink-0 my-3">
                 <div class="bg-slate-900 px-3 py-1.5 flex justify-between items-center border-b border-slate-700">
                     <span class="bg-slate-800 text-white font-mono text-xs font-black px-2.5 py-0.5 rounded border border-slate-600">${llaveId}</span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded ${estadoLlave.toUpperCase() === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${estadoLlave}</span>
                 </div>
                 <div class="p-3 space-y-2">
                     <div class="flex justify-between items-center bg-red-50 px-3 py-2 rounded border-l-4 border-red-600 shadow-sm">
-                        <div class="flex items-center space-x-1.5 overflow-hidden">
-                            <span class="text-xs truncate max-w-[140px] ${redClass}" title="${redName}">${redName}</span>
+                        <div class="flex items-center space-x-2 overflow-hidden pr-2">
+                            <span class="text-xs truncate ${redClass}" title="${redName}">${redName}</span>
                             ${redMedallaUrl ? `<img src="${redMedallaUrl}" alt="${redPuesto}" class="w-5 h-5 object-contain flex-shrink-0 drop-shadow" title="${redPuesto}">` : ''}
                         </div>
-                        <span class="text-[9px] font-black text-red-600 flex-shrink-0 ml-1">ROJO</span>
+                        <span class="text-[9px] font-black text-red-600 flex-shrink-0">ROJO</span>
                     </div>
                     <div class="flex justify-between items-center bg-blue-50 px-3 py-2 rounded border-l-4 border-blue-600 shadow-sm">
-                        <div class="flex items-center space-x-1.5 overflow-hidden">
-                            <span class="text-xs truncate max-w-[140px] ${blueClass}" title="${blueName}">${blueName}</span>
+                        <div class="flex items-center space-x-2 overflow-hidden pr-2">
+                            <span class="text-xs truncate ${blueClass}" title="${blueName}">${blueName}</span>
                             ${blueMedallaUrl ? `<img src="${blueMedallaUrl}" alt="${bluePuesto}" class="w-5 h-5 object-contain flex-shrink-0 drop-shadow" title="${bluePuesto}">` : ''}
                         </div>
-                        <span class="text-[9px] font-black text-blue-600 flex-shrink-0 ml-1">AZUL</span>
+                        <span class="text-[9px] font-black text-blue-600 flex-shrink-0">AZUL</span>
                     </div>
                 </div>
             </div>
