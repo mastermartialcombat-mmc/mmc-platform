@@ -1,5 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyW2_C7am9z6ej2gwAmxWUj2vwDwe67zA7ZvYb0BxdJah6ajl0Lv0OzQ5UFKm3V0ru0ZA/exec"; // Recuerda mantener tu URL real de Apps Script
 const LOGO_DRIVE_URL = "https://drive.google.com/file/d/1EM8MEbYssMssn1NKQfAIqA6n3Fvr1Zrb/view?usp=drive_link";
+const LOGO_DORADO_URL = "https://drive.google.com/file/d/127ufDGHvGnuYGPtvRb3K5SDBLr687rNa/view?usp=drive_link";
 
 const FONDO_ROJA_URL = "https://drive.google.com/file/d/19XJR7ZobDCXDTe8S3Dsq3EF50emXlz_Q/view?usp=drive_link";
 const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3LHiO8tFjV/view?usp=drive_link";
@@ -11,6 +12,7 @@ let taoluData = [];
 let medalleroData = [];
 let currentActiveLlave = null;
 let currentCategoryFiltered = "";
+let playerTimeouts = {};
 
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
@@ -64,6 +66,7 @@ async function loadAllData() {
         const resChamp = await fetch(`${API_URL}?sheet=Championship`);
         championshipData = await resChamp.json();
         renderChampionships(championshipData);
+        setupStreams(championshipData);
 
         const resSanda = await fetch(`${API_URL}?sheet=Sanda`);
         sandaData = await resSanda.json();
@@ -82,6 +85,7 @@ async function loadAllData() {
         renderMedallero(medalleroData);
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
+        setupStreams([]); // Fallback a placeholder
     }
 }
 
@@ -116,6 +120,109 @@ function renderChampionships(data) {
             </div>
         `;
     }).join('');
+}
+
+// Configuración de transmisiones de Sanda y Taolu
+function setupStreams(champData) {
+    const sandaContainer = document.getElementById('sanda-stream-container');
+    const taoluContainer = document.getElementById('taolu-stream-container');
+
+    const activeChamp = champData && champData.length > 0 ? champData[0] : {};
+    const sandaUrl = activeChamp.Transmision_Sanda || activeChamp.transmision_sanda || "";
+    const taoluUrl = activeChamp.Transmision_Taolu || activeChamp.transmision_taolu || "";
+
+    renderStreamInContainer(sandaContainer, sandaUrl, 'sanda');
+    renderStreamInContainer(taoluContainer, taoluUrl, 'taolu');
+}
+
+function renderStreamInContainer(container, url, type) {
+    if (!container) return;
+
+    if (!url || url.trim() === "") {
+        container.innerHTML = `
+            <div class="text-center p-6 flex flex-col items-center justify-center space-y-3 absolute inset-0 bg-black/95 z-10">
+                <img src="${convertToDirectDriveUrl(LOGO_DORADO_URL)}" alt="MMC Logo" class="h-12 md:h-16 w-auto object-contain animate-pulse">
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Esperando Transmisión En Vivo...</p>
+            </div>
+        `;
+        document.getElementById(`${type}-player-controls`)?.classList.add('hidden');
+    } else {
+        let embedUrl = url;
+        if (url.includes('youtube.com/watch?v=')) {
+            const videoId = url.split('v=')[1]?.split('&')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+        } else if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+        }
+
+        container.innerHTML = `
+            <iframe id="${type}-iframe" class="w-full h-full absolute inset-0 border-0" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        `;
+    }
+}
+
+// Funciones de Control de Reproductor Flotante
+function handlePlayerActivity(type) {
+    const controls = document.getElementById(`${type}-player-controls`);
+    if (controls) {
+        controls.classList.remove('player-hidden');
+        clearTimeout(playerTimeouts[type]);
+        playerTimeouts[type] = setTimeout(() => {
+            controls.classList.add('player-hidden');
+        }, 3500);
+    }
+}
+
+function handlePlayerMouseLeave(type) {
+    const controls = document.getElementById(`${type}-player-controls`);
+    if (controls) {
+        controls.classList.add('player-hidden');
+    }
+}
+
+function controlPlayer(type, action) {
+    const iframe = document.getElementById(`${type}-iframe`);
+    if (!iframe) return;
+    
+    // Simulación de acciones de control para iframes de YouTube o video
+    if (action === 'play') {
+        const icon = document.getElementById(`${type}-play-icon`);
+        if (icon.classList.contains('fa-play')) {
+            icon.classList.remove('fa-play');
+            icon.classList.add('fa-pause');
+        } else {
+            icon.classList.remove('fa-pause');
+            icon.classList.add('fa-play');
+        }
+    } else if (action === 'rewind') {
+        alert("Retrocediendo 10 segundos en la transmisión...");
+    } else if (action === 'forward') {
+        alert("Adelantando 10 segundos en la transmisión...");
+    }
+}
+
+function togglePiP(type) {
+    const wrapper = document.getElementById(`${type}-player-wrapper`);
+    if (wrapper) {
+        wrapper.classList.toggle('fixed');
+        wrapper.classList.toggle('bottom-4');
+        wrapper.classList.toggle('right-4');
+        wrapper.classList.toggle('w-80');
+        wrapper.classList.toggle('h-48');
+        wrapper.classList.toggle('z-50');
+        wrapper.classList.toggle('shadow-2xl');
+    }
+}
+
+function toggleFullscreen(wrapperId) {
+    const elem = document.getElementById(wrapperId);
+    if (!elem) return;
+    if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => alert(`Error al maximizar: ${err.message}`));
+    } else {
+        document.exitFullscreen();
+    }
 }
 
 // ==========================================
@@ -280,7 +387,6 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const redClass = redDni ? (ganadorOficial === "AZUL" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
         const blueClass = blueDni ? (ganadorOficial === "ROJO" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
 
-        // Obtener Puesto y URL de medalla con conversión correcta de Drive
         const redPuesto = redDni ? (r.Puesto_Nombre || r.puesto_nombre || "").trim() : "";
         const redMedallaUrl = redDni ? convertToDirectDriveUrl(r.Puesto_URL || r.puesto_url || "") : "";
 
