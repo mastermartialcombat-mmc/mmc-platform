@@ -667,11 +667,11 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO
+// MÓDULO TAOLU Y MEDALLERO (CON SELECT DE FILTROS)
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
-    const filtersContainer = document.getElementById('taolu-groups-filters');
+    const selectContainer = document.getElementById('taolu-group-select');
     if (!container) return;
 
     if (!data || data.length === 0) {
@@ -696,19 +696,19 @@ function renderTaoluGroups(data) {
         groups[key].sort((a, b) => Number(a.Orden_Salida || a.orden_salida || 99) - Number(b.Orden_Salida || b.orden_salida || 99));
     });
 
-    let filterHtml = `<button onclick="filterTaoluGroup('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition shadow">Todos los Grupos</button>`;
+    let selectHtml = `<option value="ALL">Todos los Grupos (${data.length} Participantes)</option>`;
     let htmlContent = '';
 
     Object.keys(groups).forEach((grupoName, idx) => {
         const athletes = groups[grupoName];
         const safeId = `group-${idx}`;
 
-        filterHtml += `<button onclick="filterTaoluGroup('${safeId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-gray-300 hover:bg-slate-700 transition shadow">${grupoName}</button>`;
+        selectHtml += `<option value="${safeId}">${grupoName} (${athletes.length})</option>`;
 
         htmlContent += `
             <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
                 <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
-                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold"><i class="fa-solid fa-sword mr-2"></i> ${grupoName}</h4>
+                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold"><i class="fa-solid fa-khanda mr-2"></i> ${grupoName}</h4>
                     <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -761,7 +761,7 @@ function renderTaoluGroups(data) {
         `;
     });
 
-    if (filtersContainer) filtersContainer.innerHTML = filterHtml;
+    if (selectContainer) selectContainer.innerHTML = selectHtml;
     container.innerHTML = htmlContent;
 }
 
@@ -781,7 +781,7 @@ function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl, siglasEscuela, nombr
     
     const avatarContainer = document.getElementById('taolu-avatar-container');
     if (avatarContainer) {
-        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-3xl text-gray-500"></i>`;
+        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-4xl text-gray-600"></i>`;
     }
 
     const schoolLogoContainer = document.getElementById('taolu-school-logo');

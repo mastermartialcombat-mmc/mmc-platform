@@ -58,7 +58,7 @@
             <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
                 <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-mmcGold bg-mmcBorder/50 transition"><i class="fa-solid fa-house mr-2"></i>Inicio</button>
                 <button onclick="switchView('sanda')" id="nav-sanda" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-hand-fist mr-2"></i>Sanda</button>
-                <button onclick="switchView('taolu')" id="nav-taolu" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-sword mr-2"></i>Taolu</button>
+                <button onclick="switchView('taolu')" id="nav-taolu" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-khanda mr-2"></i>Taolu</button>
                 <button onclick="switchView('medallero')" id="nav-medallero" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-trophy mr-2"></i>Medallero</button>
             </nav>
 
@@ -215,7 +215,7 @@
             </div>
         </section>
 
-        <!-- Vista 3: TAOLU (ANCHO COMPLETO, LOGO ESPADA Y PUNTAJE RESALTADO) -->
+        <!-- Vista 3: TAOLU (FOTO CUADRADA AL BORDEN Y PUNTAJE SÚPER RESALTADO) -->
         <section id="view-taolu" class="view-section hidden space-y-6">
             <!-- Transmisión Taolu Ancha -->
             <div id="taolu-player-wrapper" class="bg-black rounded-xl border border-mmcBorder overflow-hidden relative min-h-[300px] md:min-h-[380px] flex items-center justify-center shadow-2xl group" onmousemove="handlePlayerActivity('taolu')" onmouseleave="handlePlayerMouseLeave('taolu')">
@@ -234,15 +234,16 @@
                 </div>
             </div>
 
-            <!-- Bloque Atleta Seleccionado (Con Puntaje Resaltado) -->
-            <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center space-x-4 w-full md:w-auto">
-                    <div id="taolu-avatar-container" class="w-20 h-20 bg-slate-800 rounded-full overflow-hidden border-2 border-mmcGold flex-shrink-0 flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-user text-3xl text-gray-500"></i>
+            <!-- Bloque Atleta Seleccionado (Foto cuadrada grande al ras superior y puntaje destacado) -->
+            <div class="bg-mmcCard border border-mmcBorder rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-5 w-full md:w-auto">
+                    <!-- Foto Cuadrada Grande al Ras Superior -->
+                    <div id="taolu-avatar-container" class="w-24 h-24 md:w-28 md:h-28 bg-slate-900 rounded-2xl overflow-hidden border-2 border-mmcGold flex-shrink-0 flex items-center justify-center shadow-xl">
+                        <i class="fa-solid fa-user text-4xl text-gray-600"></i>
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-1.5">
                         <span class="text-xs text-mmcGold font-extrabold uppercase tracking-widest block">Atleta en Competencia</span>
-                        <h4 id="taolu-selected-name" class="text-lg md:text-xl font-black text-white">Selecciona un deportista</h4>
+                        <h4 id="taolu-selected-name" class="text-lg md:text-2xl font-black text-white">Selecciona un deportista</h4>
                         <div class="flex items-center space-x-2 pt-1">
                             <div id="taolu-school-logo" class="w-6 h-6 rounded-full bg-slate-900 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center">
                                 <i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>
@@ -257,21 +258,27 @@
                         <span class="text-xs text-gray-400 uppercase tracking-wider block">Forma a Realizar</span>
                         <span id="taolu-selected-forma" class="text-sm font-black text-white">---</span>
                     </div>
-                    <div class="text-center bg-black/80 rounded-2xl px-8 py-3 border-2 border-mmcGold/80 shadow-2xl">
-                        <span class="text-[10px] text-gray-300 font-bold uppercase tracking-widest block">Puntaje Final</span>
-                        <span id="taolu-selected-score" class="font-mono text-4xl md:text-5xl font-black text-mmcGold drop-shadow-md">0.00</span>
+                    <!-- Puntaje Súper Resaltado y Destacado -->
+                    <div class="text-center bg-gradient-to-b from-amber-500/20 via-black to-black rounded-2xl px-10 py-4 border-2 border-amber-500 shadow-2xl shadow-amber-500/20">
+                        <span class="text-[11px] text-amber-400 font-black uppercase tracking-widest block mb-0.5">Puntaje Final</span>
+                        <span id="taolu-selected-score" class="font-mono text-5xl md:text-6xl font-black text-mmcGold drop-shadow-lg">0.00</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Listado de Grupos Taolu con Fondo Claro Contrastante -->
+            <!-- Listado de Grupos Taolu con Filtro Desplegable y Fondo Claro -->
             <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-6 shadow-xl">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-mmcBorder">
                     <div>
-                        <h3 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-sword text-mmcGold mr-2"></i> Taolu - Órdenes de Salida por Grupos</h3>
+                        <h3 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-khanda text-mmcGold mr-2"></i> Taolu - Órdenes de Salida por Grupos</h3>
                         <p class="text-xs text-gray-400 mt-1">Deportistas organizados por categoría y forma a realizar</p>
                     </div>
-                    <div id="taolu-groups-filters" class="flex flex-wrap gap-2"></div>
+                    <!-- Lista Desplegable de Filtros -->
+                    <div class="w-full md:w-auto min-w-[320px]">
+                        <select id="taolu-group-select" onchange="filterTaoluGroup(this.value)" class="w-full bg-slate-900 text-white border border-mmcBorder rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-mmcGold shadow-inner">
+                            <!-- Dinámico -->
+                        </select>
+                    </div>
                 </div>
                 <div id="taolu-groups-container" class="space-y-6"></div>
             </div>
@@ -289,7 +296,7 @@
     <nav class="md:hidden bg-mmcCard border-t border-mmcBorder fixed bottom-0 left-0 right-0 z-50 flex justify-around py-3 text-xs shadow-lg">
         <button onclick="switchView('home')" id="mob-home" class="mob-btn flex flex-col items-center text-mmcGold font-bold"><i class="fa-solid fa-house text-lg mb-1"></i>Inicio</button>
         <button onclick="switchView('sanda')" id="mob-sanda" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-hand-fist text-lg mb-1"></i>Sanda</button>
-        <button onclick="switchView('taolu')" id="mob-taolu" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-sword text-lg mb-1"></i>Taolu</button>
+        <button onclick="switchView('taolu')" id="mob-taolu" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-khanda text-lg mb-1"></i>Taolu</button>
         <button onclick="switchView('medallero')" id="mob-medallero" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-trophy text-lg mb-1"></i>Medallero</button>
     </nav>
 
