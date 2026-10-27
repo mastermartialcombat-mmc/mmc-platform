@@ -4,6 +4,7 @@ const LOGO_DORADO_URL = "https://drive.google.com/file/d/127ufDGHvGnuYGPtvRb3K5S
 
 const FONDO_ROJA_URL = "https://drive.google.com/file/d/19XJR7ZobDCXDTe8S3Dsq3EF50emXlz_Q/view?usp=drive_link";
 const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3LHiO8tFjV/view?usp=drive_link";
+const FONDO_TAOLU_DORADA_URL = "https://drive.google.com/file/d/175X5Yl1yJD2QnXERooOkLRb3bAqcKXFm/view?usp=drive_link";
 
 let championshipData = [];
 let sandaData = [];
@@ -33,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const cardAzul = document.getElementById('card-esquina-azul');
     if (cardAzul) cardAzul.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_AZUL_URL)}')`;
+
+    const taoluAvatar = document.getElementById('taolu-avatar-container');
+    if (taoluAvatar) {
+        taoluAvatar.style.backgroundImage = `url('${convertToDirectDriveUrl(FONDO_TAOLU_DORADA_URL)}')`;
+    }
 
     loadAllData();
 });
@@ -87,6 +93,18 @@ async function loadAllData() {
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
         setupStreams([]);
+    }
+}
+
+async function syncTaoluData() {
+    try {
+        const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
+        taoluData = await resTaolu.json();
+        renderTaoluGroups(taoluData);
+        alert("¡Puntajes y puestos de Taolu actualizados correctamente desde Google Sheets!");
+    } catch (err) {
+        console.error("Error al sincronizar Taolu:", err);
+        alert("Error al actualizar puntajes de Taolu.");
     }
 }
 
@@ -667,7 +685,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO (CON SELECT DE FILTROS)
+// MÓDULO TAOLU Y MEDALLERO (CON PUESTO URL Y FONDO DORADO)
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -735,6 +753,7 @@ function renderTaoluGroups(data) {
                                 const orden = row.Orden_Salida || row.orden_salida || "-";
                                 const fotoUrl = convertToDirectDriveUrl(row.URL_Foto || row.url_foto || "");
                                 const logoEscuelaUrl = convertToDirectDriveUrl(row.URL_Logo || row.url_logo || "");
+                                const puestoUrl = convertToDirectDriveUrl(row.Puesto_URL || row.puesto_url || "");
 
                                 return `
                                     <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}', '${escuela}', '${nombreEscuela}', '${logoEscuelaUrl}')" class="hover:bg-slate-100 cursor-pointer transition font-medium">
@@ -750,7 +769,10 @@ function renderTaoluGroups(data) {
                                                 ${estado}
                                             </span>
                                         </td>
-                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-base">${puntaje}</td>
+                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-base flex items-center justify-end space-x-2">
+                                            <span>${puntaje}</span>
+                                            ${puestoUrl ? `<img src="${puestoUrl}" class="w-6 h-6 object-contain inline-block drop-shadow" alt="Medalla">` : ''}
+                                        </td>
                                     </tr>
                                 `;
                             }).join('')}
@@ -781,7 +803,7 @@ function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl, siglasEscuela, nombr
     
     const avatarContainer = document.getElementById('taolu-avatar-container');
     if (avatarContainer) {
-        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-4xl text-gray-600"></i>`;
+        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top z-10 relative">` : `<i class="fa-solid fa-user text-5xl text-gray-500 z-10 relative"></i>`;
     }
 
     const schoolLogoContainer = document.getElementById('taolu-school-logo');
