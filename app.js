@@ -72,7 +72,9 @@ function switchView(viewName) {
         currentActiveChampId = null;
         currentActiveChampName = null;
         const badge = document.getElementById('active-championship-badge');
+        const badgeMob = document.getElementById('active-championship-badge-mobile');
         if (badge) badge.classList.add('hidden');
+        if (badgeMob) badgeMob.classList.add('hidden');
     }
 
     document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
@@ -159,7 +161,6 @@ function setupHeroBackgroundCarousel(inicioRows) {
     if (heroImagesList.length > 0) {
         applyHeroBackground(heroImagesList[0]);
         if (heroIntervalId) clearInterval(heroIntervalId);
-        // Rotar imagen cada 5 minutos (300000 ms)
         heroIntervalId = setInterval(() => {
             heroImageIndex = (heroImageIndex + 1) % heroImagesList.length;
             applyHeroBackground(heroImagesList[heroImageIndex]);
@@ -179,13 +180,20 @@ function selectChampionship(champId, nombreCampeonato) {
     currentActiveChampName = (nombreCampeonato || "").toString().trim();
 
     const badge = document.getElementById('active-championship-badge');
+    const badgeMob = document.getElementById('active-championship-badge-mobile');
     const headerName = document.getElementById('header-champ-name');
+    const headerNameMob = document.getElementById('header-champ-name-mob');
     const sandaTitleBadge = document.getElementById('current-champ-title-sanda');
 
     if (badge && headerName) {
         headerName.innerText = currentActiveChampName;
         badge.classList.remove('hidden');
         badge.classList.add('flex');
+    }
+    if (badgeMob && headerNameMob) {
+        headerNameMob.innerText = currentActiveChampName;
+        badgeMob.classList.remove('hidden');
+        badgeMob.classList.add('flex');
     }
     if (sandaTitleBadge) {
         sandaTitleBadge.innerText = currentActiveChampName;
@@ -890,7 +898,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO
+// MÓDULO TAOLU Y MEDALLERO (Con diseño optimizado para celdas y tablas móviles)
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -930,32 +938,24 @@ function renderTaoluGroups(data) {
         selectHtml += `<option value="${safeId}">${grupoName} (${athletes.length})</option>`;
 
         htmlContent += `
-            <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
-                <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
+            <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-3 md:p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
+                <div class="bg-slate-900 text-white px-3 md:px-4 py-3 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2 shadow">
                     <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center">
                         <i class="fa-solid fa-khanda text-mmcGold mr-2"></i> 
                         ${grupoName}
                     </h4>
-                    <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
+                    <span class="text-[10px] md:text-xs bg-slate-800 text-mmcGold font-bold px-2.5 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm table-fixed">
-                        <colgroup>
-                            <col style="width: 10%;">
-                            <col style="width: 32%;">
-                            <col style="width: 18%;">
-                            <col style="width: 18%;">
-                            <col style="width: 12%;">
-                            <col style="width: 10%;">
-                        </colgroup>
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left text-xs md:text-sm min-w-[600px]">
                         <thead class="bg-slate-100 text-slate-700 uppercase text-[10px] border-b border-slate-300 font-extrabold">
                             <tr>
-                                <th class="py-3 px-3">Orden</th>
-                                <th class="py-3 px-3">Deportista</th>
-                                <th class="py-3 px-3">Escuela</th>
-                                <th class="py-3 px-3 text-center">Género / Nivel</th>
-                                <th class="py-3 px-3 text-center">Estado</th>
-                                <th class="py-3 px-3 text-right">Puntaje Final</th>
+                                <th class="py-3 px-2 w-12 text-center">Orden</th>
+                                <th class="py-3 px-3 min-w-[180px]">Deportista</th>
+                                <th class="py-3 px-3 min-w-[120px]">Escuela</th>
+                                <th class="py-3 px-3 text-center min-w-[120px]">Género / Nivel</th>
+                                <th class="py-3 px-3 text-center min-w-[100px]">Estado</th>
+                                <th class="py-3 px-3 text-right min-w-[90px]">Puntaje Final</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200">
@@ -974,26 +974,28 @@ function renderTaoluGroups(data) {
 
                                 return `
                                     <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}', '${escuela}', '${nombreEscuela}', '${logoEscuelaUrl}')" class="hover:bg-slate-100 cursor-pointer transition font-medium">
-                                        <td class="py-3.5 px-3 font-extrabold text-amber-700">${orden}</td>
-                                        <td class="py-3.5 px-3 font-bold text-slate-900 flex items-center space-x-2.5 truncate">
-                                            ${fotoUrl ? `<img src="${fotoUrl}" class="w-8 h-8 rounded-full object-cover border border-mmcGold shadow flex-shrink-0">` : `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 flex-shrink-0"><i class="fa-solid fa-user"></i></div>`}
-                                            <span class="truncate">${nombre}</span>
-                                        </td>
-                                        <td class="py-3.5 px-3 text-slate-700 font-bold text-xs">
-                                            <div class="flex items-center space-x-1.5 truncate">
-                                                ${logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-5 h-5 object-contain flex-shrink-0" alt="Logo">` : ''}
-                                                <span class="truncate">${escuela}</span>
+                                        <td class="py-3 px-2 font-extrabold text-amber-700 text-center">${orden}</td>
+                                        <td class="py-3 px-3 font-bold text-slate-900">
+                                            <div class="flex items-center space-x-2">
+                                                ${fotoUrl ? `<img src="${fotoUrl}" class="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover border border-mmcGold shadow flex-shrink-0">` : `<div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 flex-shrink-0"><i class="fa-solid fa-user"></i></div>`}
+                                                <span class="truncate max-w-[160px] md:max-w-none" title="${nombre}">${nombre}</span>
                                             </div>
                                         </td>
-                                        <td class="py-3.5 px-3 text-center text-xs text-slate-600 truncate">${genero} / ${nivel}</td>
-                                        <td class="py-3.5 px-3 text-center">
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-black inline-block ${estado === 'FINALIZADO' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
+                                        <td class="py-3 px-3 text-slate-700 font-bold text-xs">
+                                            <div class="flex items-center space-x-1.5">
+                                                ${logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-5 h-5 object-contain flex-shrink-0" alt="Logo">` : ''}
+                                                <span class="truncate max-w-[100px]" title="${escuela}">${escuela}</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-3 text-center text-xs text-slate-600">${genero} / ${nivel}</td>
+                                        <td class="py-3 px-3 text-center">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-black inline-block whitespace-nowrap ${estado === 'FINALIZADO' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
                                                 ${estado}
                                             </span>
                                         </td>
-                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-sm">
-                                            <div class="flex items-center justify-end space-x-1.5">
-                                                ${puestoUrl ? `<img src="${puestoUrl}" class="w-5 h-5 object-contain inline-block drop-shadow flex-shrink-0" alt="Medalla">` : ''}
+                                        <td class="py-3 px-3 text-right font-black text-amber-700 text-xs md:text-sm">
+                                            <div class="flex items-center justify-end space-x-1">
+                                                ${puestoUrl ? `<img src="${puestoUrl}" class="w-4 h-4 md:w-5 md:h-5 object-contain inline-block drop-shadow flex-shrink-0" alt="Medalla">` : ''}
                                                 <span>${puntaje}</span>
                                             </div>
                                         </td>
@@ -1070,26 +1072,26 @@ function renderMedalleroAndPodium(data) {
     const top3 = sorted[2] || null;
 
     podiumContainer.innerHTML = `
-        <div class="flex items-end justify-center gap-4 md:gap-10 w-full pt-6">
+        <div class="flex items-end justify-center gap-2 md:gap-10 w-full pt-4 md:pt-6">
             <!-- 2do Puesto (Plata) -->
-            <div class="flex flex-col items-center flex-1 max-w-[180px]">
-                ${top2 ? `<div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-slate-900 border-4 border-slate-300 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top2.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs md:text-sm font-black text-white text-center truncate w-full mb-3 px-2">${top2.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
-                <div class="w-full h-28 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/50">
-                    <span class="text-4xl md:text-5xl font-black text-slate-800 drop-shadow">2</span>
+            <div class="flex flex-col items-center flex-1 max-w-[120px] md:max-w-[180px]">
+                ${top2 ? `<div class="w-16 h-16 md:w-24 md:h-24 rounded-full bg-slate-900 border-2 md:border-4 border-slate-300 overflow-hidden mb-2 md:mb-4 shadow-2xl flex items-center justify-center"><img src="${top2.logo}" class="w-full h-full object-contain p-1.5" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[10px] md:text-sm font-black text-white text-center truncate w-full mb-2 md:mb-3 px-1">${top2.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-24 md:h-28 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/50">
+                    <span class="text-3xl md:text-5xl font-black text-slate-800 drop-shadow">2</span>
                 </div>
             </div>
             <!-- 1er Puesto (Oro) -->
-            <div class="flex flex-col items-center flex-1 max-w-[200px] -translate-y-6">
-                ${top1 ? `<div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-900 border-4 border-amber-400 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top1.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-sm md:text-base font-black text-mmcGold text-center truncate w-full mb-3 px-2 drop-shadow">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
-                <div class="w-full h-40 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/70">
-                    <span class="text-5xl md:text-6xl font-black text-slate-900 drop-shadow">1</span>
+            <div class="flex flex-col items-center flex-1 max-w-[140px] md:max-w-[200px] -translate-y-3 md:-translate-y-6">
+                ${top1 ? `<div class="w-20 h-20 md:w-28 md:h-28 rounded-full bg-slate-900 border-2 md:border-4 border-amber-400 overflow-hidden mb-2 md:mb-4 shadow-2xl flex items-center justify-center"><img src="${top1.logo}" class="w-full h-full object-contain p-1.5" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs md:text-base font-black text-mmcGold text-center truncate w-full mb-2 md:mb-3 px-1 drop-shadow">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-32 md:h-40 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/70">
+                    <span class="text-4xl md:text-6xl font-black text-slate-900 drop-shadow">1</span>
                 </div>
             </div>
             <!-- 3er Puesto (Bronce) -->
-            <div class="flex flex-col items-center flex-1 max-w-[180px]">
-                ${top3 ? `<div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-slate-900 border-4 border-amber-600 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top3.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs md:text-sm font-black text-white text-center truncate w-full mb-3 px-2">${top3.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
-                <div class="w-full h-24 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/40">
-                    <span class="text-4xl md:text-5xl font-black text-amber-100 drop-shadow">3</span>
+            <div class="flex flex-col items-center flex-1 max-w-[120px] md:max-w-[180px]">
+                ${top3 ? `<div class="w-16 h-16 md:w-24 md:h-24 rounded-full bg-slate-900 border-2 md:border-4 border-amber-600 overflow-hidden mb-2 md:mb-4 shadow-2xl flex items-center justify-center"><img src="${top3.logo}" class="w-full h-full object-contain p-1.5" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[10px] md:text-sm font-black text-white text-center truncate w-full mb-2 md:mb-3 px-1">${top3.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-20 md:h-24 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/40">
+                    <span class="text-3xl md:text-5xl font-black text-amber-100 drop-shadow">3</span>
                 </div>
             </div>
         </div>

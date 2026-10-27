@@ -45,14 +45,22 @@
 </head>
 <body class="bg-mmcDark text-gray-100 font-sans antialiased min-h-screen flex flex-col selection:bg-mmcGold selection:text-black pb-20 md:pb-0">
 
-    <!-- Header / Navbar Desktop -->
+    <!-- Header / Navbar Desktop & Mobile Responsive -->
     <header class="bg-mmcCard/90 backdrop-blur border-b border-mmcBorder sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
-                <img id="nav-logo" src="" alt="MMC Logo" class="h-10 w-auto object-contain rounded" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'">
-                <div>
-                    <h1 class="text-xs md:text-sm font-bold tracking-wider uppercase text-white leading-none">Master Martial Combat</h1>
-                    <span class="text-[9px] md:text-[10px] text-mmcGold font-semibold tracking-widest uppercase">Wushu • Sanda • Taolu</span>
+        <div class="max-w-7xl mx-auto px-4 py-2.5 md:py-0 md:h-16 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
+            <div class="w-full md:w-auto flex justify-between md:justify-start items-center">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
+                    <img id="nav-logo" src="" alt="MMC Logo" class="h-9 md:h-10 w-auto object-contain rounded" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'">
+                    <div>
+                        <h1 class="text-xs md:text-sm font-bold tracking-wider uppercase text-white leading-none">Master Martial Combat</h1>
+                        <span class="text-[9px] md:text-[10px] text-mmcGold font-semibold tracking-widest uppercase">Wushu • Sanda • Taolu</span>
+                    </div>
+                </div>
+
+                <!-- Badge móvil integrado arriba a la derecha si está activo -->
+                <div id="active-championship-badge-mobile" class="md:hidden hidden items-center bg-slate-900 border border-mmcGold/40 px-2.5 py-1 rounded-xl max-w-[160px]">
+                    <span class="text-[9px] text-mmcGold font-extrabold uppercase tracking-wider truncate" id="header-champ-name-mob">---</span>
+                    <button onclick="switchView('home')" class="ml-1.5 text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
 
@@ -63,7 +71,8 @@
                 <button onclick="switchView('medallero')" id="nav-medallero" class="nav-btn px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-mmcBorder/50 transition"><i class="fa-solid fa-trophy mr-2"></i>Medallero</button>
             </nav>
 
-            <div id="active-championship-badge" class="hidden items-center bg-slate-900 border border-mmcGold/40 px-3 py-1.5 rounded-xl">
+            <!-- Badge desktop -->
+            <div id="active-championship-badge" class="hidden md:flex items-center bg-slate-900 border border-mmcGold/40 px-3 py-1.5 rounded-xl">
                 <span class="text-[10px] text-mmcGold font-extrabold uppercase tracking-wider truncate max-w-[200px]" id="header-champ-name">---</span>
                 <button onclick="switchView('home')" class="ml-2 text-gray-400 hover:text-white text-xs" title="Cambiar de Campeonato"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -75,11 +84,8 @@
         
         <!-- Vista 1: INICIO -->
         <section id="view-home" class="view-section space-y-8">
-            <!-- Hero Banner de Ancho Completo con Imagen Clara y Difuminado Inferior -->
             <div id="home-hero-banner" class="relative w-full rounded-none md:rounded-2xl overflow-hidden border-b md:border border-mmcBorder bg-slate-900 min-h-[420px] md:min-h-[480px] flex items-center px-4 md:px-12 py-16 shadow-2xl bg-cover bg-center transition-all duration-1000">
-                <!-- Overlay sutil arriba que se intensifica y difumina a negro abajo -->
                 <div class="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/40 to-mmcDark"></div>
-                
                 <div class="relative z-10 max-w-4xl mx-auto w-full space-y-4">
                     <span class="bg-mmcGold/20 text-mmcGold border border-mmcGold/30 text-xs px-3.5 py-1.5 rounded-full uppercase font-extrabold tracking-wider inline-block">Torneos de Artes Marciales</span>
                     <h2 class="text-4xl md:text-6xl font-black text-white tracking-tight uppercase leading-none drop-shadow-lg">Competencias de Wushu</h2>
@@ -287,11 +293,11 @@
                 </div>
 
                 <!-- Listado de Grupos Taolu -->
-                <div class="bg-mmcCard border border-mmcBorder rounded-xl p-6 space-y-6 shadow-xl">
+                <div class="bg-mmcCard border border-mmcBorder rounded-xl p-4 md:p-6 space-y-6 shadow-xl overflow-hidden">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-mmcBorder">
                         <div>
-                            <div class="flex items-center space-x-3">
-                                <h3 class="text-xl font-bold text-white uppercase flex items-center">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg md:text-xl font-bold text-white uppercase flex items-center">
                                     <i class="fa-solid fa-khanda text-mmcGold mr-2"></i> 
                                     Órdenes de Salida & Resultados
                                 </h3>
@@ -301,8 +307,8 @@
                             </div>
                             <p class="text-xs text-gray-400 mt-1">Deportistas organizados por categoría y forma a realizar</p>
                         </div>
-                        <div class="w-full md:w-auto min-w-[320px]">
-                            <select id="taolu-group-select" onchange="filterTaoluGroup(this.value)" class="w-full bg-slate-900 text-white border border-mmcBorder rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-mmcGold shadow-inner">
+                        <div class="w-full md:w-auto md:min-w-[320px]">
+                            <select id="taolu-group-select" onchange="filterTaoluGroup(this.value)" class="w-full bg-slate-900 text-white border border-mmcBorder rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-mmcGold shadow-inner truncate">
                                 <!-- Dinámico -->
                             </select>
                         </div>
@@ -324,11 +330,11 @@
         <section id="view-medallero" class="view-section hidden max-w-7xl mx-auto px-4 py-6 space-y-8">
             <div id="medallero-content-wrapper" class="space-y-8">
                 <!-- Podio de Escuelas Ganadoras -->
-                <div class="bg-mmcCard border border-mmcBorder rounded-2xl p-8 shadow-2xl flex flex-col items-center space-y-6">
-                    <h3 class="text-2xl font-black text-white uppercase tracking-wider flex items-center drop-shadow">
-                        <i class="fa-solid fa-trophy text-mmcGold mr-3 text-3xl"></i> Podio General de Instituciones
+                <div class="bg-mmcCard border border-mmcBorder rounded-2xl p-4 md:p-8 shadow-2xl flex flex-col items-center space-y-6 overflow-hidden">
+                    <h3 class="text-xl md:text-2xl font-black text-white uppercase tracking-wider flex items-center drop-shadow text-center">
+                        <i class="fa-solid fa-trophy text-mmcGold mr-3 text-2xl md:text-3xl"></i> Podio General de Instituciones
                     </h3>
-                    <div id="podium-container" class="w-full max-w-5xl py-6 flex items-end justify-center gap-6 md:gap-12 min-h-[300px] bg-slate-950/80 rounded-2xl border-2 border-mmcBorder px-6 shadow-2xl">
+                    <div id="podium-container" class="w-full max-w-5xl py-4 md:py-6 flex items-end justify-center gap-2 md:gap-12 min-h-[260px] md:min-h-[300px] bg-slate-950/80 rounded-2xl border-2 border-mmcBorder px-2 md:px-6 shadow-2xl overflow-x-hidden">
                         <!-- Dinámico -->
                     </div>
                 </div>
