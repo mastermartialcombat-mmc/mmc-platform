@@ -89,7 +89,8 @@ async function loadAllData() {
 
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
         medalleroData = await resMedall.json();
-        renderMedallero(medalleroData);
+        renderMedalleroAndPodium(medalleroData);
+        renderGeneralDeportistas(taoluData, medalleroData);
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
         setupStreams([]);
@@ -101,6 +102,12 @@ async function syncTaoluData() {
         const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
         taoluData = await resTaolu.json();
         renderTaoluGroups(taoluData);
+
+        const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
+        medalleroData = await resMedall.json();
+        renderMedalleroAndPodium(medalleroData);
+        renderGeneralDeportistas(taoluData, medalleroData);
+
         alert("¡Puntajes y puestos de Taolu actualizados correctamente desde Google Sheets!");
     } catch (err) {
         console.error("Error al sincronizar Taolu:", err);
@@ -685,7 +692,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO (TABLA CUADRADA Y ORDENADA)
+// MÓDULO TAOLU Y MEDALLERO (CON PODIO Y LISTA GENERAL)
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -726,7 +733,10 @@ function renderTaoluGroups(data) {
         htmlContent += `
             <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
                 <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
-                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center"><svg class="w-4 h-4 fill-current mr-2 text-mmcGold inline-block" viewBox="0 0 24 24"><path d="M6.5 2c-.3 0-.5.1-.7.3l-3.5 3.5c-.4.4-.4 1 0 1.4l2.1 2.1L1.1 12.5c-.4.4-.4 1 0 1.4l3.5 3.5c.4.4 1 .4 1.4 0l3.5-3.5c.4-.4.4-1 0-1.4L7.4 10.9l2.1-2.1c.4-.4.4-1 0-1.4L6 3.9c-.2-.2-.4-.3-.7-.3m11 2c-.3 0-.5.1-.7.3l-3.5 3.5c-.4.4-.4 1 0 1.4l2.1 2.1-3.5 3.5c-.4.4-.4 1 0 1.4l3.5 3.5c.4.4 1 .4 1.4 0l3.5-3.5c.4-.4.4-1 0-1.4l-2.1-2.1 2.1-2.1c.4-.4.4-1 0-1.4l-3.5-3.5c-.2-.2-.4-.3-.7-.3M6.5 4.8l2.1 2.1-2.1 2.1L4.4 6.9zM18 16.2l2.1 2.1-2.1 2.1-2.1-2.1z"/></svg> ${grupoName}</h4>
+                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold flex items-center">
+                        <svg class="w-4 h-4 fill-current mr-2 text-mmcGold inline-block" viewBox="0 0 512 512"><path d="M256 0c-14.3 0-27.6 7.6-35 20l-31 52c-15.5 26-6.4 59.5 19.6 75.1l11.7 7.1c-19.4 34.5-35.3 71.3-47.3 109.8C103.7 274.6 38.8 305.7 13.9 367.6c-10.2 25.3-.2 54.1 22.8 67.2l39 22.5c22.9 13.2 51.6 6.8 67.3-14.7 32.7-44.8 77.2-74.9 127-89.8 49.8 14.9 94.3 45 127 89.8 15.8 21.5 44.4 27.9 67.3 14.7l39-22.5c23-13.1 33-41.9 22.8-67.2-24.9-61.9-89.8-93-161.1-102.7-12-38.5-27.9-75.3-47.3-109.8l11.7-7.1c26-15.6 35.1-49.1 19.6-75.1l-31-52c-7.4-12.4-20.7-20-35-20s-27.6 7.6-35 20l-15.5 26.1c-22.1-4.7-44.8-4.7-66.9 0L291 20c-7.4-12.4-20.7-20-35-20zm-8.8 180.5c17.5-3.5 35.7-3.5 53.2 0 11.2 2.2 21.1 8.2 28.5 16.9l4.5 5.4c-28.7 19.3-60.6 30.7-95.3 33.5l4.5-5.4c7.4-8.7 17.3-14.7 28.5-16.9z"/></svg> 
+                        ${grupoName}
+                    </h4>
                     <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -819,25 +829,29 @@ function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl, siglasEscuela, nombr
     const avatarContainer = document.getElementById('taolu-avatar-container');
     if (avatarContainer) {
         avatarContainer.innerHTML = `
-            <div class="absolute inset-0 bg-black/60 z-0"></div>
-            ${fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top z-10 relative">` : `<i class="fa-solid fa-user text-5xl text-gray-400 z-10 relative"></i>`}
+            <div class="absolute inset-0 bg-black/50 z-0"></div>
+            ${fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top z-10 relative">` : `<i class="fa-solid fa-user text-5xl text-gray-300 z-10 relative"></i>`}
         `;
     }
 
     const schoolLogoContainer = document.getElementById('taolu-school-logo');
     if (schoolLogoContainer) {
-        schoolLogoContainer.innerHTML = logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
+        schoolLogoContainer.innerHTML = logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-amber-400"></i>`;
     }
 }
 
-function renderMedallero(data) {
-    const container = document.getElementById('medallero-table-container');
-    if (!container) return;
+function renderMedalleroAndPodium(data) {
+    const tableContainer = document.getElementById('medallero-table-container');
+    const podiumContainer = document.getElementById('podium-container');
+    if (!tableContainer || !podiumContainer) return;
 
     const totals = {};
     data.forEach(row => {
         const esc = row.Nombre_Escuela || row.nombre_escuela || 'Independiente';
-        if (!totals[esc]) totals[esc] = { esc, oro: 0, plata: 0, bronce: 0, puntos: 0 };
+        const logo = convertToDirectDriveUrl(row.URL_Logo || row.url_logo || "");
+        const siglas = row.Siglas || row.siglas || "MMC";
+
+        if (!totals[esc]) totals[esc] = { esc, logo, siglas, oro: 0, plata: 0, bronce: 0, puntos: 0 };
         if (row.ID_Puesto === 'M-1') totals[esc].oro += 1;
         if (row.ID_Puesto === 'M-2') totals[esc].plata += 1;
         if (row.ID_Puesto === 'M-3') totals[esc].bronce += 1;
@@ -846,7 +860,39 @@ function renderMedallero(data) {
 
     const sorted = Object.values(totals).sort((a, b) => b.puntos - a.puntos);
 
-    container.innerHTML = `
+    // Renderizar Podio (Top 3)
+    const top1 = sorted[0] || null;
+    const top2 = sorted[1] || null;
+    const top3 = sorted[2] || null;
+
+    podiumContainer.innerHTML = `
+        <div class="flex items-end justify-center gap-3 md:gap-6 w-full">
+            <!-- 2do Puesto (Plata) -->
+            <div class="flex flex-col items-center flex-1 max-w-[140px]">
+                ${top2 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-slate-300 overflow-hidden mb-2 shadow-lg flex items-center justify-center"><img src="${top2.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top2.esc}</span><span class="text-[10px] text-mmcGold font-mono font-bold">${top2.puntos} pts</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
+                <div class="w-full h-24 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-xl flex items-center justify-center shadow-xl border-t-2 border-white/40">
+                    <span class="text-3xl font-black text-slate-800 drop-shadow">2</span>
+                </div>
+            </div>
+            <!-- 1er Puesto (Oro) -->
+            <div class="flex flex-col items-center flex-1 max-w-[150px] -translate-y-4">
+                ${top1 ? `<div class="w-12 h-12 rounded-full bg-slate-900 border-2 border-amber-400 overflow-hidden mb-2 shadow-xl flex items-center justify-center"><img src="${top1.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs font-black text-white text-center truncate w-full">${top1.esc}</span><span class="text-[11px] text-mmcGold font-mono font-black">${top1.puntos} pts</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
+                <div class="w-full h-32 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-xl flex items-center justify-center shadow-2xl border-t-2 border-white/60">
+                    <span class="text-4xl font-black text-slate-900 drop-shadow">1</span>
+                </div>
+            </div>
+            <!-- 3er Puesto (Bronce) -->
+            <div class="flex flex-col items-center flex-1 max-w-[140px]">
+                ${top3 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-amber-600 overflow-hidden mb-2 shadow-lg flex items-center justify-center"><img src="${top3.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top3.esc}</span><span class="text-[10px] text-mmcGold font-mono font-bold">${top3.puntos} pts</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
+                <div class="w-full h-20 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl flex items-center justify-center shadow-xl border-t-2 border-white/30">
+                    <span class="text-3xl font-black text-amber-100 drop-shadow">3</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Renderizar Tabla de Escuelas
+    tableContainer.innerHTML = `
         <table class="w-full text-left text-sm">
             <thead class="bg-slate-900 text-gray-400 uppercase text-[11px] border-b border-mmcBorder">
                 <tr>
@@ -862,13 +908,68 @@ function renderMedallero(data) {
                 ${sorted.map((item, idx) => `
                     <tr class="hover:bg-slate-800/50 transition">
                         <td class="py-3 px-4 font-bold text-mmcGold">${idx + 1}</td>
-                        <td class="py-3 px-4 font-bold text-white">${item.esc}</td>
+                        <td class="py-3 px-4 font-bold text-white flex items-center space-x-3">
+                            ${item.logo ? `<img src="${item.logo}" class="w-7 h-7 object-contain flex-shrink-0" alt="Logo">` : ''}
+                            <div>
+                                <span class="block">${item.esc}</span>
+                                <span class="text-[10px] text-gray-400 font-normal">${item.siglas}</span>
+                            </div>
+                        </td>
                         <td class="py-3 px-4 text-center font-bold text-yellow-400">${item.oro}</td>
                         <td class="py-3 px-4 text-center font-bold text-gray-300">${item.plata}</td>
                         <td class="py-3 px-4 text-center font-bold text-amber-600">${item.bronce}</td>
                         <td class="py-3 px-4 text-right font-black text-mmcGold">${item.puntos} pts</td>
                     </tr>
                 `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderGeneralDeportistas(taoluRows, medalleroRows) {
+    const container = document.getElementById('general-deportistas-container');
+    if (!container) return;
+
+    if (!taoluRows || taoluRows.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay deportistas registrados en el evento.</p>`;
+        return;
+    }
+
+    container.innerHTML = `
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-900 text-gray-400 uppercase text-[11px] border-b border-mmcBorder">
+                <tr>
+                    <th class="py-3 px-4">Deportista</th>
+                    <th class="py-3 px-4">Escuela</th>
+                    <th class="py-3 px-4 text-center">Código Forma / Llave</th>
+                    <th class="py-3 px-4 text-center">Puesto Obtenido</th>
+                    <th class="py-3 px-4 text-right">Puntaje Equivalente</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-mmcBorder">
+                ${taoluRows.map(row => {
+                    const nombre = row.Nombre_Completo || row.nombre_completo || "Competidor";
+                    const escuela = row.Siglas_Escuela || row.siglas_escuela || "MMC";
+                    const codigoForma = row.Codigo_Forma || row.codigo_forma || row.Codigo_Forma_Llave || "GEN";
+                    const puestoNombre = row.Puesto_Nombre || row.puesto_nombre || row.Puesto || "Participante";
+                    const puestoUrl = convertToDirectDriveUrl(row.Puesto_URL || row.puesto_url || "");
+                    const puntaje = row.Puntaje_Final || row.puntaje_final || "0.00";
+
+                    return `
+                        <tr class="hover:bg-slate-800/50 transition">
+                            <td class="py-3.5 px-4 font-bold text-white">${nombre}</td>
+                            <td class="py-3.5 px-4 text-gray-300 font-semibold">${escuela}</td>
+                            <td class="py-3.5 px-4 text-center font-mono text-xs font-bold text-mmcGold">${codigoForma}</td>
+                            <td class="py-3.5 px-4 text-center">
+                                <div class="inline-flex items-center space-x-1.5 bg-slate-800 px-3 py-1 rounded-full border border-mmcBorder">
+                                    ${puestoUrl ? `<img src="${puestoUrl}" class="w-5 h-5 object-contain" alt="Medalla">` : ''}
+                                    <span class="text-xs font-bold text-white">${puestoNombre}</span>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-black text-mmcGold text-base">${puntaje} pts</td>
+                        </tr>
+                    `;
+                }).join('')}
             </tbody>
         </table>
     `;
