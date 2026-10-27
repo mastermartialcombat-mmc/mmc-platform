@@ -122,7 +122,7 @@ function renderChampionships(data) {
     }).join('');
 }
 
-// Configuración de transmisiones y estados (EN VIVO / FINALIZADO)
+// Configuración de transmisiones y estados (EN VIVO / FINALIZADO) silenciadas por defecto
 function setupStreams(champData) {
     const sandaContainer = document.getElementById('sanda-stream-container');
     const taoluContainer = document.getElementById('taolu-stream-container');
@@ -194,7 +194,7 @@ function renderStreamInContainer(container, url, type) {
     }
 }
 
-// Controles personalizados de la barra flotante
+// Controles de la barra flotante de transmisiones
 function openStreamSource(type) {
     const url = streamUrls[type];
     if (url) {
@@ -340,7 +340,7 @@ function filterSandaCategory(categoryName) {
     }
 }
 
-// Renderizar Árbol de Llaves con Fases Dinámicas, Ancho Estandarizado (310px) y Medallas Corregidas
+// Renderizar Árbol de Llaves
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
@@ -401,8 +401,8 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const redDni = (r.DNI_Participante || r.dni_participante || "").toString().trim();
         const blueDni = (b.DNI_Participante || b.dni_participante || "").toString().trim();
 
-        const redName = redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingressar || "Ganador de llave previa");
-        const blueName = blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingressar || "Ganador de llave previa");
+        const redName = redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Ganador de llave previa");
+        const blueName = blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Ganador de llave previa");
 
         const redClass = redDni ? (ganadorOficial === "AZUL" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
         const blueClass = blueDni ? (ganadorOficial === "ROJO" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
@@ -727,15 +727,17 @@ function renderTaoluGroups(data) {
                             ${athletes.map(row => {
                                 const nombre = row.Nombre_Completo || row.nombre_completo || "Competidor";
                                 const escuela = row.Siglas_Escuela || row.siglas_escuela || "MMC";
+                                const nombreEscuela = row.Nombre_Escuela || row.nombre_escuela || "Master Martial Combat";
                                 const genero = row.Genero || row.genero || "";
                                 const nivel = row.Nivel || row.nivel || "";
                                 const puntaje = row.Puntaje_Final || row.puntaje_final || "0.00";
                                 const estado = row.Estado || row.estado || "PENDIENTE";
                                 const orden = row.Orden_Salida || row.orden_salida || "-";
                                 const fotoUrl = convertToDirectDriveUrl(row.URL_Foto || row.url_foto || "");
+                                const logoEscuelaUrl = convertToDirectDriveUrl(row.URL_Logo || row.url_logo || "");
 
                                 return `
-                                    <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}')" class="hover:bg-slate-800/60 cursor-pointer transition">
+                                    <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}', '${escuela}', '${nombreEscuela}', '${logoEscuelaUrl}')" class="hover:bg-slate-800/60 cursor-pointer transition">
                                         <td class="py-3 px-3 font-bold text-mmcGold">${orden}</td>
                                         <td class="py-3 px-3 font-bold text-white flex items-center space-x-2">
                                             ${fotoUrl ? `<img src="${fotoUrl}" class="w-7 h-7 rounded-full object-cover border border-mmcGold">` : `<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-gray-400"><i class="fa-solid fa-user"></i></div>`}
@@ -770,14 +772,21 @@ function filterTaoluGroup(groupId) {
     });
 }
 
-function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl) {
-    document.getElementById('taolu-selected-name').innerText = nombre;
-    document.getElementById('taolu-selected-forma').innerText = grupo;
-    document.getElementById('taolu-selected-score').innerText = puntaje;
+function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl, siglasEscuela, nombreEscuela, logoEscuelaUrl) {
+    document.getElementById('taolu-selected-name').innerText = nombre || "Competidor";
+    document.getElementById('taolu-selected-forma').innerText = grupo || "---";
+    document.getElementById('taolu-selected-score').innerText = puntaje || "0.00";
+    document.getElementById('taolu-selected-siglas').innerText = siglasEscuela || "MMC";
+    document.getElementById('taolu-selected-inst').innerText = nombreEscuela || "Master Martial Combat";
     
     const avatarContainer = document.getElementById('taolu-avatar-container');
     if (avatarContainer) {
-        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-2xl text-gray-500"></i>`;
+        avatarContainer.innerHTML = fotoUrl ? `<img src="${fotoUrl}" class="w-full h-full object-cover object-top">` : `<i class="fa-solid fa-user text-3xl text-gray-500"></i>`;
+    }
+
+    const schoolLogoContainer = document.getElementById('taolu-school-logo');
+    if (schoolLogoContainer) {
+        schoolLogoContainer.innerHTML = logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
     }
 }
 
