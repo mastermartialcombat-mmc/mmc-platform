@@ -13,6 +13,7 @@ let medalleroData = [];
 let currentActiveLlave = null;
 let currentCategoryFiltered = "";
 let playerTimeouts = {};
+let streamUrls = { sanda: "", taolu: "" };
 
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
@@ -85,7 +86,7 @@ async function loadAllData() {
         renderMedallero(medalleroData);
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
-        setupStreams([]); // Fallback a placeholder
+        setupStreams([]);
     }
 }
 
@@ -108,7 +109,6 @@ function renderChampionships(data) {
             <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-xl min-h-[220px] flex flex-col justify-end p-6">
                 ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-900"></div>`}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
-
                 <div class="relative z-10 space-y-2">
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${estado}</span>
                     <h4 class="text-lg font-black text-white leading-snug">${nombre}</h4>
@@ -122,17 +122,48 @@ function renderChampionships(data) {
     }).join('');
 }
 
-// Configuración de transmisiones de Sanda y Taolu
+// Configuración de transmisiones y estados (EN VIVO / FINALIZADO)
 function setupStreams(champData) {
     const sandaContainer = document.getElementById('sanda-stream-container');
     const taoluContainer = document.getElementById('taolu-stream-container');
+    const sandaBadge = document.getElementById('sanda-badge-container');
+    const taoluBadge = document.getElementById('taolu-badge-container');
 
     const activeChamp = champData && champData.length > 0 ? champData[0] : {};
+    
     const sandaUrl = activeChamp.Transmision_Sanda || activeChamp.transmision_sanda || "";
+    const sandaEstado = (activeChamp.Estado_Sanda || activeChamp.estado_sanda || "").trim().toUpperCase();
+
     const taoluUrl = activeChamp.Transmision_Taolu || activeChamp.transmision_taolu || "";
+    const taoluEstado = (activeChamp.Estado_Taolu || activeChamp.estado_taolu || "").trim().toUpperCase();
+
+    streamUrls.sanda = sandaUrl;
+    streamUrls.taolu = taoluUrl;
 
     renderStreamInContainer(sandaContainer, sandaUrl, 'sanda');
+    renderStreamBadge(sandaBadge, sandaEstado);
+
     renderStreamInContainer(taoluContainer, taoluUrl, 'taolu');
+    renderStreamBadge(taoluBadge, taoluEstado);
+}
+
+function renderStreamBadge(badgeContainer, estado) {
+    if (!badgeContainer) return;
+    if (estado === "EN VIVO") {
+        badgeContainer.innerHTML = `
+            <span class="flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full font-black shadow-lg uppercase tracking-wider border border-red-400">
+                <span class="w-2.5 h-2.5 bg-white rounded-full mr-2 animate-pulse-dot inline-block"></span> EN VIVO
+            </span>
+        `;
+    } else if (estado === "FINALIZADO" || estado === "FINALIZADDO") {
+        badgeContainer.innerHTML = `
+            <span class="flex items-center bg-slate-900/90 text-mmcGold text-xs px-3 py-1 rounded-full font-black shadow-lg uppercase tracking-wider border border-mmcGold/50">
+                <i class="fa-solid fa-rotate-right mr-1.5 animate-spin"></i> REPETICIÓN DEL EVENTO
+            </span>
+        `;
+    } else {
+        badgeContainer.innerHTML = "";
+    }
 }
 
 function renderStreamInContainer(container, url, type) {
@@ -150,22 +181,45 @@ function renderStreamInContainer(container, url, type) {
         let embedUrl = url;
         if (url.includes('youtube.com/watch?v=')) {
             const videoId = url.split('v=')[1]?.split('&')[0];
-            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1`;
         } else if (url.includes('youtu.be/')) {
             const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1`;
         }
 
         container.innerHTML = `
             <iframe id="${type}-iframe" class="w-full h-full absolute inset-0 border-0" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         `;
+        document.getElementById(`${type}-player-controls`)?.classList.remove('hidden');
     }
 }
 
-// Funciones de Control de Reproductor Flotante
+// Controles personalizados de la barra flotante
+function openStreamSource(type) {
+    const url = streamUrls[type];
+    if (url) {
+        window.open(url, '_blank');
+    } else {
+        alert("No hay enlace de transmisión disponible.");
+    }
+}
+
+function copyStreamLink(type) {
+    const url = streamUrls[type];
+    if (url) {
+        navigator.clipboard.writeText(url).then(() => {
+            alert("¡Enlace de transmisión copiado al portapapeles!");
+        }).catch(err => {
+            console.error("Error al copiar:", err);
+        });
+    } else {
+        alert("No hay enlace para compartir.");
+    }
+}
+
 function handlePlayerActivity(type) {
     const controls = document.getElementById(`${type}-player-controls`);
-    if (controls) {
+    if (controls && streamUrls[type]) {
         controls.classList.remove('player-hidden');
         clearTimeout(playerTimeouts[type]);
         playerTimeouts[type] = setTimeout(() => {
@@ -181,40 +235,6 @@ function handlePlayerMouseLeave(type) {
     }
 }
 
-function controlPlayer(type, action) {
-    const iframe = document.getElementById(`${type}-iframe`);
-    if (!iframe) return;
-    
-    // Simulación de acciones de control para iframes de YouTube o video
-    if (action === 'play') {
-        const icon = document.getElementById(`${type}-play-icon`);
-        if (icon.classList.contains('fa-play')) {
-            icon.classList.remove('fa-play');
-            icon.classList.add('fa-pause');
-        } else {
-            icon.classList.remove('fa-pause');
-            icon.classList.add('fa-play');
-        }
-    } else if (action === 'rewind') {
-        alert("Retrocediendo 10 segundos en la transmisión...");
-    } else if (action === 'forward') {
-        alert("Adelantando 10 segundos en la transmisión...");
-    }
-}
-
-function togglePiP(type) {
-    const wrapper = document.getElementById(`${type}-player-wrapper`);
-    if (wrapper) {
-        wrapper.classList.toggle('fixed');
-        wrapper.classList.toggle('bottom-4');
-        wrapper.classList.toggle('right-4');
-        wrapper.classList.toggle('w-80');
-        wrapper.classList.toggle('h-48');
-        wrapper.classList.toggle('z-50');
-        wrapper.classList.toggle('shadow-2xl');
-    }
-}
-
 function toggleFullscreen(wrapperId) {
     const elem = document.getElementById(wrapperId);
     if (!elem) return;
@@ -226,7 +246,7 @@ function toggleFullscreen(wrapperId) {
 }
 
 // ==========================================
-// MÓDULO SANSHOU
+// MÓDULO SANDA
 // ==========================================
 let currentMatchLevel = "AVANZADO"; 
 let timerInterval = null;
@@ -271,7 +291,7 @@ function filterSandaCategory(categoryName) {
     }
 
     document.getElementById('bracket-category-title').innerText = categoryName;
-    document.getElementById('bracket-subtitle-info').innerText = `Sanshou • Categoría: ${categoryName} • Eliminación Directa`;
+    document.getElementById('bracket-subtitle-info').innerText = `Sanda • Categoría: ${categoryName} • Eliminación Directa`;
 
     const filtered = sandaData.filter(row => {
         const edad = row.Rango_Edad || row.rango_edad || "";
@@ -381,8 +401,8 @@ function renderTournamentBracketsTree(filteredFighters, llavesData) {
         const redDni = (r.DNI_Participante || r.dni_participante || "").toString().trim();
         const blueDni = (b.DNI_Participante || b.dni_participante || "").toString().trim();
 
-        const redName = redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingresar || "Ganador de llave previa");
-        const blueName = blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Ganador de llave previa");
+        const redName = redDni ? (r.Nombre_Completo || r.nombre_completo) : (r.Ganador_a_Ingresar || r.ganador_a_ingressar || "Ganador de llave previa");
+        const blueName = blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingressar || "Ganador de llave previa");
 
         const redClass = redDni ? (ganadorOficial === "AZUL" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
         const blueClass = blueDni ? (ganadorOficial === "ROJO" ? "text-slate-400 line-through opacity-50 font-normal" : "text-slate-900 font-extrabold") : "text-slate-500 italic font-medium";
