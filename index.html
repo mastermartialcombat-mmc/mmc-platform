@@ -57,8 +57,8 @@
                     </div>
                 </div>
 
-                <!-- Badge móvil integrado arriba a la derecha si está activo -->
-                <div id="active-championship-badge-mobile" class="md:hidden hidden items-center bg-slate-900 border border-mmcGold/40 px-2.5 py-1 rounded-xl max-w-[160px]">
+                <!-- Badge responsive integrado para pantallas angostas / móviles -->
+                <div id="active-championship-badge-mobile" class="md:hidden hidden items-center bg-slate-900 border border-mmcGold/40 px-2.5 py-1 rounded-xl max-w-[180px]">
                     <span class="text-[9px] text-mmcGold font-extrabold uppercase tracking-wider truncate" id="header-champ-name-mob">---</span>
                     <button onclick="switchView('home')" class="ml-1.5 text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
                 </div>
@@ -86,9 +86,9 @@
         <section id="view-home" class="view-section space-y-8">
             <div id="home-hero-banner" class="relative w-full rounded-none md:rounded-2xl overflow-hidden border-b md:border border-mmcBorder bg-slate-900 min-h-[420px] md:min-h-[480px] flex items-center px-4 md:px-12 py-16 shadow-2xl bg-cover bg-center transition-all duration-1000">
                 <div class="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/40 to-mmcDark"></div>
-                <div class="relative z-10 max-w-4xl mx-auto w-full space-y-4">
+                <div class="relative z-10 max-w-5xl mx-auto w-full space-y-4 text-center md:text-left">
                     <span class="bg-mmcGold/20 text-mmcGold border border-mmcGold/30 text-xs px-3.5 py-1.5 rounded-full uppercase font-extrabold tracking-wider inline-block">Torneos de Artes Marciales</span>
-                    <h2 class="text-4xl md:text-6xl font-black text-white tracking-tight uppercase leading-none drop-shadow-lg">Competencias de Wushu</h2>
+                    <h2 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight uppercase leading-tight drop-shadow-lg px-2 md:px-0">Diciplina • Deporte • Tradición • Superación</h2>
                 </div>
             </div>
 
@@ -329,13 +329,13 @@
         <!-- Vista 4: MEDALLERO -->
         <section id="view-medallero" class="view-section hidden max-w-7xl mx-auto px-4 py-6 space-y-8">
             <div id="medallero-content-wrapper" class="space-y-8">
-                <!-- Podio de Escuelas Ganadoras -->
+                <!-- Podio de Escuelas Ganadoras ajustado al ancho del bloque azul -->
                 <div class="bg-mmcCard border border-mmcBorder rounded-2xl p-4 md:p-8 shadow-2xl flex flex-col items-center space-y-6 overflow-hidden">
                     <h3 class="text-xl md:text-2xl font-black text-white uppercase tracking-wider flex items-center drop-shadow text-center">
                         <i class="fa-solid fa-trophy text-mmcGold mr-3 text-2xl md:text-3xl"></i> Podio General de Instituciones
                     </h3>
-                    <div id="podium-container" class="w-full max-w-5xl py-4 md:py-6 flex items-end justify-center gap-2 md:gap-12 min-h-[260px] md:min-h-[300px] bg-slate-950/80 rounded-2xl border-2 border-mmcBorder px-2 md:px-6 shadow-2xl overflow-x-hidden">
-                        <!-- Dinámico -->
+                    <div id="podium-container" class="w-full max-w-4xl py-4 md:py-6 flex items-end justify-between gap-2 md:gap-6 min-h-[260px] md:min-h-[300px] bg-slate-950/80 rounded-2xl border-2 border-mmcBorder px-3 md:px-8 shadow-2xl overflow-hidden">
+                        <!-- Dinámico con distribución ajustada por bloques flex de igual proporción -->
                     </div>
                 </div>
 

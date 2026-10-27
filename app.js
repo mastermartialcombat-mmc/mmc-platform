@@ -898,7 +898,7 @@ function updateTimerDisplay() {
 }
 
 // ==========================================
-// MÓDULO TAOLU Y MEDALLERO (Con diseño optimizado para celdas y tablas móviles)
+// MÓDULO TAOLU Y MEDALLERO
 // ==========================================
 function renderTaoluGroups(data) {
     const container = document.getElementById('taolu-groups-container');
@@ -1072,26 +1072,26 @@ function renderMedalleroAndPodium(data) {
     const top3 = sorted[2] || null;
 
     podiumContainer.innerHTML = `
-        <div class="flex items-end justify-center gap-2 md:gap-10 w-full pt-4 md:pt-6">
+        <div class="flex items-end justify-between w-full pt-4 md:pt-6 gap-2">
             <!-- 2do Puesto (Plata) -->
-            <div class="flex flex-col items-center flex-1 max-w-[120px] md:max-w-[180px]">
-                ${top2 ? `<div class="w-16 h-16 md:w-24 md:h-24 rounded-full bg-slate-900 border-2 md:border-4 border-slate-300 overflow-hidden mb-2 md:mb-4 shadow-2xl flex items-center justify-center"><img src="${top2.logo}" class="w-full h-full object-contain p-1.5" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[10px] md:text-sm font-black text-white text-center truncate w-full mb-2 md:mb-3 px-1">${top2.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
-                <div class="w-full h-24 md:h-28 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/50">
-                    <span class="text-3xl md:text-5xl font-black text-slate-800 drop-shadow">2</span>
+            <div class="flex flex-col items-center w-1/3 px-1">
+                ${top2 ? `<div class="w-14 h-14 sm:w-18 sm:h-18 md:w-22 md:h-22 rounded-full bg-slate-900 border-2 md:border-4 border-slate-300 overflow-hidden mb-2 shadow-xl flex items-center justify-center flex-shrink-0"><img src="${top2.logo}" class="w-full h-full object-contain p-1" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[9px] sm:text-xs md:text-sm font-black text-white text-center truncate w-full mb-2 px-0.5" title="${top2.esc}">${top2.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/50">
+                    <span class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-800 drop-shadow">2</span>
                 </div>
             </div>
             <!-- 1er Puesto (Oro) -->
-            <div class="flex flex-col items-center flex-1 max-w-[140px] md:max-w-[200px] -translate-y-3 md:-translate-y-6">
-                ${top1 ? `<div class="w-20 h-20 md:w-28 md:h-28 rounded-full bg-slate-900 border-2 md:border-4 border-amber-400 overflow-hidden mb-2 md:mb-4 shadow-2xl flex items-center justify-center"><img src="${top1.logo}" class="w-full h-full object-contain p-1.5" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs md:text-base font-black text-mmcGold text-center truncate w-full mb-2 md:mb-3 px-1 drop-shadow">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
-                <div class="w-full h-32 md:h-40 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/70">
-                    <span class="text-4xl md:text-6xl font-black text-slate-900 drop-shadow">1</span>
+            <div class="flex flex-col items-center w-1/3 px-1 -translate-y-3 sm:-translate-y-5 md:-translate-y-6">
+                ${top1 ? `<div class="w-16 h-16 sm:w-20 sm:h-20 md:w-26 md:h-26 rounded-full bg-slate-900 border-2 md:border-4 border-amber-400 overflow-hidden mb-2 shadow-xl flex items-center justify-center flex-shrink-0"><img src="${top1.logo}" class="w-full h-full object-contain p-1" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[10px] sm:text-xs md:text-base font-black text-mmcGold text-center truncate w-full mb-2 px-0.5 drop-shadow" title="${top1.esc}">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-32 sm:h-36 md:h-44 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/70">
+                    <span class="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 drop-shadow">1</span>
                 </div>
             </div>
             <!-- 3er Puesto (Bronce) -->
-            <div class="flex flex-col items-center flex-1 max-w-[120px] md:max-w-[180px]">
-                ${top3 ? `<div class="w-16 h-16 md:w-24 md:h-24 rounded-full bg-slate-900 border-2 md:border-4 border-amber-600 overflow-hidden mb-2 md:mb-4 shadow-2xl flex items-center justify-center"><img src="${top3.logo}" class="w-full h-full object-contain p-1.5" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[10px] md:text-sm font-black text-white text-center truncate w-full mb-2 md:mb-3 px-1">${top3.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
-                <div class="w-full h-20 md:h-24 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/40">
-                    <span class="text-3xl md:text-5xl font-black text-amber-100 drop-shadow">3</span>
+            <div class="flex flex-col items-center w-1/3 px-1">
+                ${top3 ? `<div class="w-14 h-14 sm:w-18 sm:h-18 md:w-22 md:h-22 rounded-full bg-slate-900 border-2 md:border-4 border-amber-600 overflow-hidden mb-2 shadow-xl flex items-center justify-center flex-shrink-0"><img src="${top3.logo}" class="w-full h-full object-contain p-1" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[9px] sm:text-xs md:text-sm font-black text-white text-center truncate w-full mb-2 px-0.5" title="${top3.esc}">${top3.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-20 sm:h-24 md:h-28 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl flex items-center justify-center shadow-2xl border-t-2 md:border-t-4 border-white/40">
+                    <span class="text-3xl sm:text-4xl md:text-5xl font-black text-amber-100 drop-shadow">3</span>
                 </div>
             </div>
         </div>
