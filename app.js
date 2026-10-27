@@ -122,7 +122,6 @@ function renderChampionships(data) {
     }).join('');
 }
 
-// Configuración de transmisiones y estados (EN VIVO / FINALIZADO) silenciadas por defecto
 function setupStreams(champData) {
     const sandaContainer = document.getElementById('sanda-stream-container');
     const taoluContainer = document.getElementById('taolu-stream-container');
@@ -194,7 +193,6 @@ function renderStreamInContainer(container, url, type) {
     }
 }
 
-// Controles de la barra flotante de transmisiones
 function openStreamSource(type) {
     const url = streamUrls[type];
     if (url) {
@@ -340,7 +338,6 @@ function filterSandaCategory(categoryName) {
     }
 }
 
-// Renderizar Árbol de Llaves
 function renderTournamentBracketsTree(filteredFighters, llavesData) {
     const container = document.getElementById('tournament-brackets-container');
     if (!container) return;
@@ -598,7 +595,6 @@ function applyRoundCircleStyle(roundNum, winnerColor, scoreText) {
     }
 }
 
-// Cronómetro
 function toggleTimer() {
     const btn = document.getElementById('timer-btn');
     if (timerInterval) {
@@ -685,9 +681,13 @@ function renderTaoluGroups(data) {
 
     const groups = {};
     data.forEach(row => {
-        const forma = row.Nombre_Forma || row.nombre_forma || "Rutina General";
-        const codigo = row.Codigo_Forma || row.codigo_forma || "GEN";
-        const grupoKey = `${forma} [${codigo}]`;
+        const armas = row.Armas || row.armas || "Mano Libre";
+        const nivel = row.Nivel || row.nivel || "Avanzado";
+        const genero = row.Genero || row.genero || "General";
+        const nombreForma = row.Nombre_Forma || row.nombre_forma || "Rutina General";
+        const codigoForma = row.Codigo_Forma || row.codigo_forma || "GEN";
+
+        const grupoKey = `${armas} - ${nivel} ${genero} - ${nombreForma} (${codigoForma})`;
         if (!groups[grupoKey]) groups[grupoKey] = [];
         groups[grupoKey].push(row);
     });
@@ -696,34 +696,34 @@ function renderTaoluGroups(data) {
         groups[key].sort((a, b) => Number(a.Orden_Salida || a.orden_salida || 99) - Number(b.Orden_Salida || b.orden_salida || 99));
     });
 
-    let filterHtml = `<button onclick="filterTaoluGroup('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition">Todos los Grupos</button>`;
+    let filterHtml = `<button onclick="filterTaoluGroup('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-mmcGold text-black transition shadow">Todos los Grupos</button>`;
     let htmlContent = '';
 
     Object.keys(groups).forEach((grupoName, idx) => {
         const athletes = groups[grupoName];
         const safeId = `group-${idx}`;
 
-        filterHtml += `<button onclick="filterTaoluGroup('${safeId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-gray-300 hover:bg-slate-700 transition">${grupoName}</button>`;
+        filterHtml += `<button onclick="filterTaoluGroup('${safeId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-gray-300 hover:bg-slate-700 transition shadow">${grupoName}</button>`;
 
         htmlContent += `
-            <div class="taolu-group-card space-y-3" data-groupid="${safeId}">
-                <div class="bg-slate-900 px-4 py-2.5 rounded-lg border border-mmcBorder flex justify-between items-center">
-                    <h4 class="font-extrabold text-sm text-mmcGold uppercase"><i class="fa-solid fa-shield-halved mr-2"></i> ${grupoName}</h4>
-                    <span class="text-xs bg-slate-800 text-gray-400 px-2 py-0.5 rounded-full">${athletes.length} Participantes</span>
+            <div class="taolu-group-card space-y-3 bg-white/95 text-slate-900 p-5 rounded-2xl shadow-xl border border-slate-300" data-groupid="${safeId}">
+                <div class="bg-slate-900 text-white px-4 py-3 rounded-xl flex justify-between items-center shadow">
+                    <h4 class="font-black text-xs md:text-sm uppercase tracking-wide text-mmcGold"><i class="fa-solid fa-sword mr-2"></i> ${grupoName}</h4>
+                    <span class="text-xs bg-slate-800 text-mmcGold font-bold px-3 py-1 rounded-full border border-slate-700">${athletes.length} Participantes</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-900/60 text-gray-400 uppercase text-[10px] border-b border-mmcBorder">
+                        <thead class="bg-slate-100 text-slate-700 uppercase text-[10px] border-b border-slate-300 font-extrabold">
                             <tr>
-                                <th class="py-2.5 px-3">Orden</th>
-                                <th class="py-2.5 px-3">Deportista</th>
-                                <th class="py-2.5 px-3">Escuela</th>
-                                <th class="py-2.5 px-3 text-center">Género / Nivel</th>
-                                <th class="py-2.5 px-3 text-center">Estado</th>
-                                <th class="py-2.5 px-3 text-right">Puntaje Final</th>
+                                <th class="py-3 px-3">Orden</th>
+                                <th class="py-3 px-3">Deportista</th>
+                                <th class="py-3 px-3">Escuela</th>
+                                <th class="py-3 px-3 text-center">Género / Nivel</th>
+                                <th class="py-3 px-3 text-center">Estado</th>
+                                <th class="py-3 px-3 text-right">Puntaje Final</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-mmcBorder">
+                        <tbody class="divide-y divide-slate-200">
                             ${athletes.map(row => {
                                 const nombre = row.Nombre_Completo || row.nombre_completo || "Competidor";
                                 const escuela = row.Siglas_Escuela || row.siglas_escuela || "MMC";
@@ -737,20 +737,20 @@ function renderTaoluGroups(data) {
                                 const logoEscuelaUrl = convertToDirectDriveUrl(row.URL_Logo || row.url_logo || "");
 
                                 return `
-                                    <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}', '${escuela}', '${nombreEscuela}', '${logoEscuelaUrl}')" class="hover:bg-slate-800/60 cursor-pointer transition">
-                                        <td class="py-3 px-3 font-bold text-mmcGold">${orden}</td>
-                                        <td class="py-3 px-3 font-bold text-white flex items-center space-x-2">
-                                            ${fotoUrl ? `<img src="${fotoUrl}" class="w-7 h-7 rounded-full object-cover border border-mmcGold">` : `<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-gray-400"><i class="fa-solid fa-user"></i></div>`}
+                                    <tr onclick="selectTaoluAtleta('${nombre}', '${grupoName}', '${puntaje}', '${fotoUrl}', '${escuela}', '${nombreEscuela}', '${logoEscuelaUrl}')" class="hover:bg-slate-100 cursor-pointer transition font-medium">
+                                        <td class="py-3.5 px-3 font-extrabold text-amber-700">${orden}</td>
+                                        <td class="py-3.5 px-3 font-bold text-slate-900 flex items-center space-x-2.5">
+                                            ${fotoUrl ? `<img src="${fotoUrl}" class="w-8 h-8 rounded-full object-cover border border-mmcGold shadow">` : `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-user"></i></div>`}
                                             <span>${nombre}</span>
                                         </td>
-                                        <td class="py-3 px-3 text-gray-300 text-xs">${escuela}</td>
-                                        <td class="py-3 px-3 text-center text-xs text-gray-400">${genero} / ${nivel}</td>
-                                        <td class="py-3 px-3 text-center">
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${estado === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
+                                        <td class="py-3.5 px-3 text-slate-700 font-bold text-xs">${escuela}</td>
+                                        <td class="py-3.5 px-3 text-center text-xs text-slate-600">${genero} / ${nivel}</td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <span class="px-2.5 py-1 rounded text-[10px] font-black ${estado === 'FINALIZADO' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
                                                 ${estado}
                                             </span>
                                         </td>
-                                        <td class="py-3 px-3 text-right font-black text-mmcGold">${puntaje}</td>
+                                        <td class="py-3.5 px-3 text-right font-black text-amber-700 text-base">${puntaje}</td>
                                     </tr>
                                 `;
                             }).join('')}
