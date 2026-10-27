@@ -49,11 +49,14 @@ function switchView(viewName) {
     if (target) target.classList.remove('hidden');
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('text-mmcGold', 'bg-mmcBorder/50');
-        btn.classList.add('text-gray-300');
+        btn.classList.remove('text-mmcGold', 'bg-mmcBorder/50', 'font-bold');
+        btn.classList.add('text-gray-400');
     });
     const activeNav = document.getElementById(`nav-${viewName}`);
-    if (activeNav) activeNav.classList.add('text-mmcGold', 'bg-mmcBorder/50');
+    if (activeNav) {
+        activeNav.classList.remove('text-gray-400');
+        activeNav.classList.add('text-mmcGold', 'bg-mmcBorder/50', 'font-bold');
+    }
 
     document.querySelectorAll('.mob-btn').forEach(btn => {
         btn.classList.remove('text-mmcGold', 'font-bold');
@@ -868,21 +871,21 @@ function renderMedalleroAndPodium(data) {
         <div class="flex items-end justify-center gap-3 md:gap-6 w-full">
             <!-- 2do Puesto (Plata) -->
             <div class="flex flex-col items-center flex-1 max-w-[140px]">
-                ${top2 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-slate-300 overflow-hidden mb-2 shadow-lg flex items-center justify-center"><img src="${top2.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top2.esc}</span><span class="text-[10px] text-mmcGold font-mono font-bold">${top2.puntos} pts</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
+                ${top2 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-slate-300 overflow-hidden mb-2 shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top2.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top2.esc}</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
                 <div class="w-full h-24 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-xl flex items-center justify-center shadow-xl border-t-2 border-white/40">
                     <span class="text-3xl font-black text-slate-800 drop-shadow">2</span>
                 </div>
             </div>
             <!-- 1er Puesto (Oro) -->
             <div class="flex flex-col items-center flex-1 max-w-[150px] -translate-y-4">
-                ${top1 ? `<div class="w-12 h-12 rounded-full bg-slate-900 border-2 border-amber-400 overflow-hidden mb-2 shadow-xl flex items-center justify-center"><img src="${top1.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs font-black text-white text-center truncate w-full">${top1.esc}</span><span class="text-[11px] text-mmcGold font-mono font-black">${top1.puntos} pts</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
+                ${top1 ? `<div class="w-12 h-12 rounded-full bg-slate-900 border-2 border-amber-400 overflow-hidden mb-2 shadow-xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top1.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs font-black text-white text-center truncate w-full">${top1.esc}</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
                 <div class="w-full h-32 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-xl flex items-center justify-center shadow-2xl border-t-2 border-white/60">
                     <span class="text-4xl font-black text-slate-900 drop-shadow">1</span>
                 </div>
             </div>
             <!-- 3er Puesto (Bronce) -->
             <div class="flex flex-col items-center flex-1 max-w-[140px]">
-                ${top3 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-amber-600 overflow-hidden mb-2 shadow-lg flex items-center justify-center"><img src="${top3.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top3.esc}</span><span class="text-[10px] text-mmcGold font-mono font-bold">${top3.puntos} pts</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
+                ${top3 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-amber-600 overflow-hidden mb-2 shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top3.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top3.esc}</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
                 <div class="w-full h-20 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl flex items-center justify-center shadow-xl border-t-2 border-white/30">
                     <span class="text-3xl font-black text-amber-100 drop-shadow">3</span>
                 </div>
@@ -929,13 +932,13 @@ function renderGeneralDeportistasFromMedallero(medalleroRows) {
     if (!container) return;
 
     if (!medalleroRows || medalleroRows.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay registros en la hoja Medallero.</p>`;
+        container.innerHTML = `<p class="text-slate-500 text-center py-4">No hay registros en la hoja Medallero.</p>`;
         return;
     }
 
     container.innerHTML = `
         <table class="w-full text-left text-sm">
-            <thead class="bg-slate-900 text-gray-400 uppercase text-[11px] border-b border-mmcBorder">
+            <thead class="bg-slate-200 text-slate-700 uppercase text-[11px] border-b border-slate-300 font-extrabold">
                 <tr>
                     <th class="py-3 px-4">Deportista</th>
                     <th class="py-3 px-4">Escuela</th>
@@ -944,7 +947,7 @@ function renderGeneralDeportistasFromMedallero(medalleroRows) {
                     <th class="py-3 px-4 text-right">Puntaje Equivalente</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-mmcBorder">
+            <tbody class="divide-y divide-slate-200 text-slate-800 font-medium">
                 ${medalleroRows.map(row => {
                     const nombre = row.Nombre_Completo || row.nombre_completo || row.Deportista || "Competidor";
                     const escuela = row.Siglas_Escuela || row.siglas_escuela || row.Siglas || "MMC";
@@ -954,17 +957,17 @@ function renderGeneralDeportistasFromMedallero(medalleroRows) {
                     const puntaje = row.Puntaje || row.puntaje || "0.00";
 
                     return `
-                        <tr class="hover:bg-slate-800/50 transition">
-                            <td class="py-3.5 px-4 font-bold text-white">${nombre}</td>
-                            <td class="py-3.5 px-4 text-gray-300 font-semibold">${escuela}</td>
-                            <td class="py-3.5 px-4 text-center font-mono text-xs font-bold text-mmcGold">${codigoForma}</td>
+                        <tr class="hover:bg-slate-100 transition">
+                            <td class="py-3.5 px-4 font-bold text-slate-900">${nombre}</td>
+                            <td class="py-3.5 px-4 text-slate-700 font-semibold">${escuela}</td>
+                            <td class="py-3.5 px-4 text-center font-mono text-xs font-bold text-amber-700">${codigoForma}</td>
                             <td class="py-3.5 px-4 text-center">
-                                <div class="inline-flex items-center space-x-1.5 bg-slate-800 px-3 py-1 rounded-full border border-mmcBorder">
+                                <div class="inline-flex items-center space-x-1.5 bg-slate-900 text-white px-3 py-1 rounded-full border border-slate-700 shadow-sm">
                                     ${puestoUrl ? `<img src="${puestoUrl}" class="w-5 h-5 object-contain" alt="Medalla">` : ''}
-                                    <span class="text-xs font-bold text-white">${puestoNombre}</span>
+                                    <span class="text-xs font-bold">${puestoNombre}</span>
                                 </div>
                             </td>
-                            <td class="py-3.5 px-4 text-right font-black text-mmcGold text-base">${puntaje} pts</td>
+                            <td class="py-3.5 px-4 text-right font-black text-amber-700 text-base">${puntaje} pts</td>
                         </tr>
                     `;
                 }).join('')}

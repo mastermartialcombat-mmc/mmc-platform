@@ -56,10 +56,10 @@
             </div>
 
             <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
-                <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-mmcGold bg-mmcBorder/50 transition"><i class="fa-solid fa-house mr-2"></i>Inicio</button>
-                <button onclick="switchView('sanda')" id="nav-sanda" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-hand-fist mr-2"></i>Sanda</button>
-                <button onclick="switchView('taolu')" id="nav-taolu" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-khanda mr-2 text-mmcGold"></i>Taolu</button>
-                <button onclick="switchView('medallero')" id="nav-medallero" class="nav-btn px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-mmcBorder transition"><i class="fa-solid fa-trophy mr-2"></i>Medallero</button>
+                <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-mmcBorder/50 transition"><i class="fa-solid fa-house mr-2"></i>Inicio</button>
+                <button onclick="switchView('sanda')" id="nav-sanda" class="nav-btn px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-mmcBorder/50 transition"><i class="fa-solid fa-hand-fist mr-2"></i>Sanda</button>
+                <button onclick="switchView('taolu')" id="nav-taolu" class="nav-btn px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-mmcBorder/50 transition"><i class="fa-solid fa-khanda mr-2"></i>Taolu</button>
+                <button onclick="switchView('medallero')" id="nav-medallero" class="nav-btn px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-mmcBorder/50 transition"><i class="fa-solid fa-trophy mr-2"></i>Medallero</button>
             </nav>
 
             <div></div>
@@ -312,10 +312,10 @@
                 <div id="medallero-table-container" class="overflow-x-auto"></div>
             </div>
 
-            <!-- Gran Lista de Todos los Deportistas del Evento (Hoja Medallero) -->
-            <div class="bg-mmcCard border border-mmcBorder rounded-2xl p-6 shadow-2xl space-y-4">
-                <div class="flex justify-between items-center border-b border-mmcBorder pb-3">
-                    <h3 class="text-lg font-bold text-white uppercase"><i class="fa-solid fa-users text-mmcGold mr-2"></i> Listado General de Resultados (ID_Championship)</h3>
+            <!-- Gran Lista de Todos los Deportistas del Evento con Fondo Claro -->
+            <div class="bg-white text-slate-900 border border-slate-300 rounded-2xl p-6 shadow-2xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-300 pb-3">
+                    <h3 class="text-lg font-black uppercase tracking-wide text-slate-900 flex items-center"><i class="fa-solid fa-users text-amber-600 mr-2"></i> Listado General de Resultados</h3>
                 </div>
                 <div id="general-deportistas-container" class="overflow-x-auto"></div>
             </div>
@@ -323,9 +323,9 @@
     </main>
 
     <nav class="md:hidden bg-mmcCard border-t border-mmcBorder fixed bottom-0 left-0 right-0 z-50 flex justify-around py-3 text-xs shadow-lg">
-        <button onclick="switchView('home')" id="mob-home" class="mob-btn flex flex-col items-center text-mmcGold font-bold"><i class="fa-solid fa-house text-lg mb-1"></i>Inicio</button>
+        <button onclick="switchView('home')" id="mob-home" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-house text-lg mb-1"></i>Inicio</button>
         <button onclick="switchView('sanda')" id="mob-sanda" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-hand-fist text-lg mb-1"></i>Sanda</button>
-        <button onclick="switchView('taolu')" id="mob-taolu" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-khanda text-lg mb-1 text-mmcGold"></i>Taolu</button>
+        <button onclick="switchView('taolu')" id="mob-taolu" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-khanda text-lg mb-1"></i>Taolu</button>
         <button onclick="switchView('medallero')" id="mob-medallero" class="mob-btn flex flex-col items-center text-gray-400"><i class="fa-solid fa-trophy text-lg mb-1"></i>Medallero</button>
     </nav>
 
