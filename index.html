@@ -14,7 +14,8 @@
                         mmcDark: '#080c14',
                         mmcCard: '#0f172a',
                         mmcBorder: '#1e293b',
-                        mmcGold: '#f59e0b',
+                        mmcGold: '#d4af37',
+                        mmcGoldLight: '#f3e5ab',
                         mmcRed: '#ef4444',
                         mmcBlue: '#3b82f6'
                     }
@@ -80,7 +81,7 @@
             </div>
 
             <div class="space-y-4">
-                <h3 class="text-xl font-bold uppercase tracking-wider text-white flex items-center"><i class="fa-solid fa-fire text-mmcGold mr-2"></i> Competencias Registradas</h3>
+                <h3 class="text-xl font-bold uppercase tracking-wider text-white flex items-center"><i class="fa-solid fa-fire text-mmcGold mr-2"></i> Competencias</h3>
                 <div id="championships-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </section>
@@ -146,7 +147,7 @@
                     </div>
                     <span id="sanda-timer" class="font-mono text-5xl md:text-6xl font-black text-white tracking-tight">02:00</span>
                     <div class="flex items-center justify-center space-x-3">
-                        <button onclick="toggleTimer()" id="timer-btn" class="w-12 h-12 bg-mmcGold hover:bg-yellow-500 text-black rounded-full flex items-center justify-center text-lg shadow-xl transition transform active:scale-95">
+                        <button onclick="toggleTimer()" id="timer-btn" class="w-12 h-12 bg-mmcGold hover:bg-yellow-600 text-black rounded-full flex items-center justify-center text-lg shadow-xl transition transform active:scale-95">
                             <i class="fa-solid fa-play"></i>
                         </button>
                     </div>
@@ -234,20 +235,19 @@
                 </div>
             </div>
 
-            <!-- Bloque Atleta Seleccionado (Rojo con Ligero Degradado y Contraste Optimizado) -->
+            <!-- Bloque Atleta Seleccionado -->
             <div class="bg-gradient-to-r from-red-950 via-red-900 to-slate-950 border-2 border-red-600/60 rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-5 w-full md:w-auto">
-                    <!-- Contenedor con Fondo Oscurecido -->
-                    <div id="taolu-avatar-container" class="w-32 h-32 md:w-36 md:h-36 bg-cover bg-center rounded-2xl overflow-hidden border-2 border-amber-400 flex-shrink-0 flex items-center justify-center shadow-2xl relative">
+                    <div id="taolu-avatar-container" class="w-32 h-32 md:w-36 md:h-36 bg-cover bg-center rounded-2xl overflow-hidden border-2 border-mmcGold flex-shrink-0 flex items-center justify-center shadow-2xl relative">
                         <div class="absolute inset-0 bg-black/50 z-0"></div>
                         <i class="fa-solid fa-user text-5xl text-gray-300 z-10 relative"></i>
                     </div>
                     <div class="space-y-1.5">
-                        <span class="text-xs text-amber-300 font-extrabold uppercase tracking-widest block drop-shadow">Atleta en Competencia</span>
+                        <span class="text-xs text-mmcGold font-extrabold uppercase tracking-widest block drop-shadow">Atleta en Competencia</span>
                         <h4 id="taolu-selected-name" class="text-lg md:text-2xl font-black text-white drop-shadow-md">Selecciona un deportista</h4>
                         <div class="flex items-center space-x-2 pt-1">
-                            <div id="taolu-school-logo" class="w-6 h-6 rounded-full bg-slate-900 border border-amber-400 overflow-hidden flex-shrink-0 flex items-center justify-center shadow">
-                                <i class="fa-solid fa-graduation-cap text-xs text-amber-400"></i>
+                            <div id="taolu-school-logo" class="w-6 h-6 rounded-full bg-slate-900 border border-mmcGold overflow-hidden flex-shrink-0 flex items-center justify-center shadow">
+                                <i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>
                             </div>
                             <span class="text-xs text-gray-200 font-bold drop-shadow"><span id="taolu-selected-siglas">---</span> • <span id="taolu-selected-inst">---</span></span>
                         </div>
@@ -259,10 +259,9 @@
                         <span class="text-xs text-gray-300 uppercase tracking-wider block font-bold">Forma a Realizar</span>
                         <span id="taolu-selected-forma" class="text-sm font-black text-white drop-shadow">---</span>
                     </div>
-                    <!-- Puntaje Súper Resaltado -->
-                    <div class="text-center bg-gradient-to-b from-amber-500/25 via-slate-950 to-black rounded-2xl px-12 py-5 border-2 border-amber-400 shadow-2xl shadow-amber-500/20">
-                        <span class="text-[11px] text-amber-300 font-black uppercase tracking-widest block mb-0.5">Puntaje Final</span>
-                        <span id="taolu-selected-score" class="font-mono text-6xl md:text-7xl font-black text-amber-400 drop-shadow-xl">0.00</span>
+                    <div class="text-center bg-gradient-to-b from-mmcGold/25 via-slate-950 to-black rounded-2xl px-12 py-5 border-2 border-mmcGold shadow-2xl shadow-mmcGold/20">
+                        <span class="text-[11px] text-mmcGold font-black uppercase tracking-widest block mb-0.5">Puntaje Final</span>
+                        <span id="taolu-selected-score" class="font-mono text-6xl md:text-7xl font-black text-mmcGold drop-shadow-xl">0.00</span>
                     </div>
                 </div>
             </div>
@@ -282,7 +281,6 @@
                         </div>
                         <p class="text-xs text-gray-400 mt-1">Deportistas organizados por categoría y forma a realizar</p>
                     </div>
-                    <!-- Lista Desplegable de Filtros -->
                     <div class="w-full md:w-auto min-w-[320px]">
                         <select id="taolu-group-select" onchange="filterTaoluGroup(this.value)" class="w-full bg-slate-900 text-white border border-mmcBorder rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-mmcGold shadow-inner">
                             <!-- Dinámico -->
@@ -296,7 +294,7 @@
         <!-- Vista 4: MEDALLERO -->
         <section id="view-medallero" class="view-section hidden space-y-8">
             
-            <!-- Podio de Escuelas Ganadoras (Más Grande, Destacado y con Logos Más Grandes y Espaciados) -->
+            <!-- Podio de Escuelas Ganadoras -->
             <div class="bg-mmcCard border border-mmcBorder rounded-2xl p-8 shadow-2xl flex flex-col items-center space-y-6">
                 <h3 class="text-2xl font-black text-white uppercase tracking-wider flex items-center drop-shadow">
                     <i class="fa-solid fa-trophy text-mmcGold mr-3 text-3xl"></i> Podio General de Instituciones
@@ -312,9 +310,8 @@
                 <div id="medallero-table-container" class="overflow-x-auto"></div>
             </div>
 
-            <!-- Gran Lista de Todos los Deportistas con Encabezado Resaltado y Fondo Claro Sin Sombreado en Títulos -->
+            <!-- Gran Lista de Todos los Deportistas -->
             <div class="bg-white text-slate-900 border border-slate-300 rounded-2xl overflow-hidden shadow-2xl">
-                <!-- Encabezado Resaltado ID_Championship / Bloque Principal -->
                 <div class="bg-mmcCard text-white px-6 py-4 border-b border-mmcBorder flex justify-between items-center">
                     <h3 class="text-lg font-black uppercase tracking-wide text-white flex items-center">
                         <i class="fa-solid fa-users text-mmcGold mr-2.5"></i> Listado General de Resultados

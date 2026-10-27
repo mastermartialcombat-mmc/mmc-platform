@@ -123,26 +123,34 @@ function renderChampionships(data) {
     if (!container) return;
 
     if (!data || data.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 col-span-full">No se encontraron campeonatos registrados.</p>`;
+        container.innerHTML = `<p class="text-gray-400 col-span-full">No se encontraron competencias registradas.</p>`;
         return;
     }
 
     container.innerHTML = data.map(item => {
         const nombre = item.Nombre_Campeonato || item.nombre_campeonato || "Campeonato Wushu";
         const sede = item.Sede || item.sede || "Lima, Perú";
-        const estado = item.Estado_Competencia || item.estado_competencia || "EN CURSO";
+        const estado = (item.Estado_Competencia || item.estado_competencia || "PRÓXIMAMENTE").trim().toUpperCase();
         const bannerUrl = convertToDirectDriveUrl(item.Banner_URL || item.banner_url || "");
 
+        let badgeClass = "bg-amber-500/20 text-amber-400 border-amber-500/30";
+        if (estado === "EN CURSO") {
+            badgeClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+        } else if (estado === "FINALIZADO") {
+            badgeClass = "bg-slate-700 text-gray-300 border-slate-600";
+        }
+
         return `
-            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-xl min-h-[220px] flex flex-col justify-end p-6">
-                ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-900"></div>`}
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
-                <div class="relative z-10 space-y-2">
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${estado}</span>
-                    <h4 class="text-lg font-black text-white leading-snug">${nombre}</h4>
-                    <p class="text-xs text-gray-300 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-mmcGold"></i> ${sede}</p>
-                    <button onclick="switchView('sanda')" class="w-full mt-2 bg-mmcGold hover:bg-yellow-500 text-black font-black py-2 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
-                        Entrar al Evento <i class="fa-solid fa-arrow-right ml-1"></i>
+            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[320px] flex flex-col justify-end p-6 bg-slate-900">
+                ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-950"></div>`}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20"></div>
+                <div class="relative z-10 space-y-3">
+                    <span class="text-[10px] font-black px-3 py-1 rounded-full border ${badgeClass} uppercase tracking-wider inline-block shadow">${estado}</span>
+                    <h4 class="text-xl font-black text-white leading-tight drop-shadow-md">${nombre}</h4>
+                    <p class="text-xs text-gray-300 flex items-center font-medium"><i class="fa-solid fa-location-dot mr-1.5 text-mmcGold"></i> ${sede}</p>
+                    <button onclick="switchView('sanda')" class="w-full mt-2 bg-mmcGold hover:bg-yellow-600 text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg flex items-center justify-center space-x-2">
+                        <span>Ingresar a la Competencia</span>
+                        <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
@@ -839,7 +847,7 @@ function selectTaoluAtleta(nombre, grupo, puntaje, fotoUrl, siglasEscuela, nombr
 
     const schoolLogoContainer = document.getElementById('taolu-school-logo');
     if (schoolLogoContainer) {
-        schoolLogoContainer.innerHTML = logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-amber-400"></i>`;
+        schoolLogoContainer.innerHTML = logoEscuelaUrl ? `<img src="${logoEscuelaUrl}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-graduation-cap text-xs text-mmcGold"></i>`;
     }
 }
 
@@ -878,7 +886,7 @@ function renderMedalleroAndPodium(data) {
             </div>
             <!-- 1er Puesto (Oro) -->
             <div class="flex flex-col items-center flex-1 max-w-[200px] -translate-y-6">
-                ${top1 ? `<div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-900 border-4 border-amber-400 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top1.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-sm md:text-base font-black text-amber-300 text-center truncate w-full mb-3 px-2 drop-shadow">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                ${top1 ? `<div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-900 border-4 border-amber-400 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top1.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-sm md:text-base font-black text-mmcGold text-center truncate w-full mb-3 px-2 drop-shadow">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
                 <div class="w-full h-40 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/70">
                     <span class="text-5xl md:text-6xl font-black text-slate-900 drop-shadow">1</span>
                 </div>
