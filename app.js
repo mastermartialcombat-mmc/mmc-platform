@@ -868,26 +868,26 @@ function renderMedalleroAndPodium(data) {
     const top3 = sorted[2] || null;
 
     podiumContainer.innerHTML = `
-        <div class="flex items-end justify-center gap-3 md:gap-6 w-full">
+        <div class="flex items-end justify-center gap-4 md:gap-10 w-full pt-6">
             <!-- 2do Puesto (Plata) -->
-            <div class="flex flex-col items-center flex-1 max-w-[140px]">
-                ${top2 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-slate-300 overflow-hidden mb-2 shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top2.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top2.esc}</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
-                <div class="w-full h-24 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-xl flex items-center justify-center shadow-xl border-t-2 border-white/40">
-                    <span class="text-3xl font-black text-slate-800 drop-shadow">2</span>
+            <div class="flex flex-col items-center flex-1 max-w-[180px]">
+                ${top2 ? `<div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-slate-900 border-4 border-slate-300 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top2.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs md:text-sm font-black text-white text-center truncate w-full mb-3 px-2">${top2.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-28 bg-gradient-to-t from-slate-400 to-slate-300 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/50">
+                    <span class="text-4xl md:text-5xl font-black text-slate-800 drop-shadow">2</span>
                 </div>
             </div>
             <!-- 1er Puesto (Oro) -->
-            <div class="flex flex-col items-center flex-1 max-w-[150px] -translate-y-4">
-                ${top1 ? `<div class="w-12 h-12 rounded-full bg-slate-900 border-2 border-amber-400 overflow-hidden mb-2 shadow-xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top1.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs font-black text-white text-center truncate w-full">${top1.esc}</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
-                <div class="w-full h-32 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-xl flex items-center justify-center shadow-2xl border-t-2 border-white/60">
-                    <span class="text-4xl font-black text-slate-900 drop-shadow">1</span>
+            <div class="flex flex-col items-center flex-1 max-w-[200px] -translate-y-6">
+                ${top1 ? `<div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-900 border-4 border-amber-400 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top1.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-sm md:text-base font-black text-amber-300 text-center truncate w-full mb-3 px-2 drop-shadow">${top1.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-40 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/70">
+                    <span class="text-5xl md:text-6xl font-black text-slate-900 drop-shadow">1</span>
                 </div>
             </div>
             <!-- 3er Puesto (Bronce) -->
-            <div class="flex flex-col items-center flex-1 max-w-[140px]">
-                ${top3 ? `<div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-amber-600 overflow-hidden mb-2 shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top3.logo}" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-[11px] font-bold text-gray-200 text-center truncate w-full">${top3.esc}</span>` : `<span class="text-[10px] text-gray-500 mb-2">---</span>`}
-                <div class="w-full h-20 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-xl flex items-center justify-center shadow-xl border-t-2 border-white/30">
-                    <span class="text-3xl font-black text-amber-100 drop-shadow">3</span>
+            <div class="flex flex-col items-center flex-1 max-w-[180px]">
+                ${top3 ? `<div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-slate-900 border-4 border-amber-600 overflow-hidden mb-4 shadow-2xl flex items-center justify-center transition-transform duration-300 hover:scale-125"><img src="${top3.logo}" class="w-full h-full object-contain p-2" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3175/3175157.png'"></div><span class="text-xs md:text-sm font-black text-white text-center truncate w-full mb-3 px-2">${top3.esc}</span>` : `<span class="text-xs text-gray-500 mb-4">---</span>`}
+                <div class="w-full h-24 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-2xl flex items-center justify-center shadow-2xl border-t-4 border-white/40">
+                    <span class="text-4xl md:text-5xl font-black text-amber-100 drop-shadow">3</span>
                 </div>
             </div>
         </div>
@@ -938,8 +938,8 @@ function renderGeneralDeportistasFromMedallero(medalleroRows) {
 
     container.innerHTML = `
         <table class="w-full text-left text-sm">
-            <thead class="bg-slate-200 text-slate-700 uppercase text-[11px] border-b border-slate-300 font-extrabold">
-                <tr>
+            <thead>
+                <tr class="text-slate-600 uppercase text-[11px] border-b border-slate-300 font-extrabold">
                     <th class="py-3 px-4">Deportista</th>
                     <th class="py-3 px-4">Escuela</th>
                     <th class="py-3 px-4 text-center">Código Forma / Llave</th>
@@ -962,9 +962,9 @@ function renderGeneralDeportistasFromMedallero(medalleroRows) {
                             <td class="py-3.5 px-4 text-slate-700 font-semibold">${escuela}</td>
                             <td class="py-3.5 px-4 text-center font-mono text-xs font-bold text-amber-700">${codigoForma}</td>
                             <td class="py-3.5 px-4 text-center">
-                                <div class="inline-flex items-center space-x-1.5 bg-slate-900 text-white px-3 py-1 rounded-full border border-slate-700 shadow-sm">
+                                <div class="inline-flex items-center space-x-2 bg-slate-900 text-white px-3 py-1 rounded-full border border-slate-700 shadow-sm">
                                     ${puestoUrl ? `<img src="${puestoUrl}" class="w-5 h-5 object-contain" alt="Medalla">` : ''}
-                                    <span class="text-xs font-bold">${puestoNombre}</span>
+                                    <span class="text-xs font-bold uppercase">${puestoNombre}</span>
                                 </div>
                             </td>
                             <td class="py-3.5 px-4 text-right font-black text-amber-700 text-base">${puntaje} pts</td>
