@@ -80,7 +80,6 @@ function switchView(viewName) {
     if (target) target.classList.remove('hidden');
 
     if (viewName !== 'home' && !currentActiveChampId) {
-        // Mostrar aviso de que no hay evento seleccionado y ocultar contenido
         ['sanda', 'taolu', 'medallero'].forEach(sec => {
             const wrapper = document.getElementById(`${sec}-content-wrapper`);
             const msg = document.getElementById(`${sec}-no-event-msg`);
@@ -160,7 +159,7 @@ function setupHeroBackgroundCarousel(inicioRows) {
     if (heroImagesList.length > 0) {
         applyHeroBackground(heroImagesList[0]);
         if (heroIntervalId) clearInterval(heroIntervalId);
-        // Cambiar imagen difuminada cada 5 minutos (300000 ms)
+        // Rotar imagen cada 5 minutos (300000 ms)
         heroIntervalId = setInterval(() => {
             heroImageIndex = (heroImageIndex + 1) % heroImagesList.length;
             applyHeroBackground(heroImagesList[heroImageIndex]);
@@ -201,7 +200,6 @@ function selectChampionship(champId, nombreCampeonato) {
 
     setupStreamsForChamp(activeChampObj);
 
-    // Filtrar Sanda por ID_Championship o Nombre_Campeonato
     const filteredSanda = sandaDataRaw.filter(row => {
         const rId = (row.ID_Championship || row.id_championship || "").toString().trim();
         const rName = (row.Nombre_Campeonato || row.nombre_campeonato || "").toString().trim();
@@ -323,7 +321,7 @@ function renderChampionships(data) {
                         <p class="flex items-center"><i class="fa-solid fa-location-dot mr-2 text-mmcGold"></i> ${sede}</p>
                     </div>
                     <button class="w-full mt-2 bg-mmcGold hover:bg-yellow-600 text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg flex items-center justify-center space-x-2">
-                        <span>Ingresar a la Competencia</span>
+                        <span>Ingresar al Evento</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
