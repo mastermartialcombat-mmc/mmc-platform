@@ -7,6 +7,7 @@ const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3
 const FONDO_TAOLU_AZUL_PLATINADA_URL = "https://drive.google.com/file/d/1NpeYVotYxB-Kr0mglU4IgiI3MROQRPZ8/view?usp=drive_link";
 
 let championshipData = [];
+let inicioDataRaw = [];
 let sandaDataRaw = [];
 let llavesSandaDataRaw = [];
 let taoluDataRaw = [];
@@ -18,6 +19,10 @@ let currentActiveLlave = null;
 let currentCategoryFiltered = "";
 let playerTimeouts = {};
 let streamUrls = { sanda: "", taolu: "" };
+
+let heroImagesList = [];
+let heroImageIndex = 0;
+let heroIntervalId = null;
 
 function convertToDirectDriveUrl(url) {
     if (!url || typeof url !== 'string') return '';
@@ -68,17 +73,28 @@ function switchView(viewName) {
         currentActiveChampName = null;
         const badge = document.getElementById('active-championship-badge');
         if (badge) badge.classList.add('hidden');
-    } else {
-        if (!currentActiveChampId && championshipData.length > 0) {
-            const first = championshipData[0];
-            currentActiveChampId = first.ID_Championship || first.id_championship || "";
-            currentActiveChampName = first.Nombre_Campeonato || first.nombre_campeonato || "";
-        }
     }
 
     document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
     const target = document.getElementById(`view-${viewName}`);
     if (target) target.classList.remove('hidden');
+
+    if (viewName !== 'home' && !currentActiveChampId) {
+        // Mostrar aviso de que no hay evento seleccionado y ocultar contenido
+        ['sanda', 'taolu', 'medallero'].forEach(sec => {
+            const wrapper = document.getElementById(`${sec}-content-wrapper`);
+            const msg = document.getElementById(`${sec}-no-event-msg`);
+            if (wrapper) wrapper.classList.add('hidden');
+            if (msg) msg.classList.remove('hidden');
+        });
+    } else if (viewName !== 'home' && currentActiveChampId) {
+        ['sanda', 'taolu', 'medallero'].forEach(sec => {
+            const wrapper = document.getElementById(`${sec}-content-wrapper`);
+            const msg = document.getElementById(`${sec}-no-event-msg`);
+            if (wrapper) wrapper.classList.remove('hidden');
+            if (msg) msg.classList.add('hidden');
+        });
+    }
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('text-mmcGold', 'bg-mmcBorder/50', 'font-bold');
@@ -105,6 +121,10 @@ function switchView(viewName) {
 
 async function loadAllData() {
     try {
+        const resInicio = await fetch(`${API_URL}?sheet=Inicio`);
+        inicioDataRaw = await resInicio.json();
+        setupHeroBackgroundCarousel(inicioDataRaw);
+
         const resChamp = await fetch(`${API_URL}?sheet=Championship`);
         championshipData = await resChamp.json();
         renderChampionships(championshipData);
@@ -122,6 +142,36 @@ async function loadAllData() {
         medalleroDataRaw = await resMedall.json();
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
+    }
+}
+
+function setupHeroBackgroundCarousel(inicioRows) {
+    heroImagesList = [];
+    if (inicioRows && Array.isArray(inicioRows)) {
+        inicioRows.forEach(row => {
+            const usar = (row.USAR || row.usar || "").toString().trim().toUpperCase();
+            const imgUrl = row.URL_Imagen_Inicio || row.url_imagen_inicio || row["URL_ Imagen_Inicio"] || "";
+            if (usar === "SI" && imgUrl) {
+                heroImagesList.push(convertToDirectDriveUrl(imgUrl));
+            }
+        });
+    }
+
+    if (heroImagesList.length > 0) {
+        applyHeroBackground(heroImagesList[0]);
+        if (heroIntervalId) clearInterval(heroIntervalId);
+        // Cambiar imagen difuminada cada 5 minutos (300000 ms)
+        heroIntervalId = setInterval(() => {
+            heroImageIndex = (heroImageIndex + 1) % heroImagesList.length;
+            applyHeroBackground(heroImagesList[heroImageIndex]);
+        }, 300000);
+    }
+}
+
+function applyHeroBackground(url) {
+    const banner = document.getElementById('home-hero-banner');
+    if (banner) {
+        banner.style.backgroundImage = `url('${url}')`;
     }
 }
 
