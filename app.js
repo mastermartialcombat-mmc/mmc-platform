@@ -7,10 +7,12 @@ const FONDO_AZUL_URL = "https://drive.google.com/file/d/1DbdswRma_oWAwc_FrKvDfV3
 const FONDO_TAOLU_AZUL_PLATINADA_URL = "https://drive.google.com/file/d/1NpeYVotYxB-Kr0mglU4IgiI3MROQRPZ8/view?usp=drive_link";
 
 let championshipData = [];
-let sandaData = [];
-let llavesSandaData = [];
-let taoluData = [];
-let medalleroData = [];
+let sandaDataRaw = [];
+let llavesSandaDataRaw = [];
+let taoluDataRaw = [];
+let medalleroDataRaw = [];
+
+let currentActiveChampionship = null;
 let currentActiveLlave = null;
 let currentCategoryFiltered = "";
 let playerTimeouts = {};
@@ -44,6 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function switchView(viewName) {
+    if (viewName === 'home') {
+        currentActiveChampionship = null;
+        const badge = document.getElementById('active-championship-badge');
+        if (badge) badge.classList.add('hidden');
+    } else {
+        if (!currentActiveChampionship && championshipData.length > 0) {
+            currentActiveChampionship = championshipData[0].Nombre_Campeonato || championshipData[0].nombre_campeonato;
+        }
+    }
+
     document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
     const target = document.getElementById(`view-${viewName}`);
     if (target) target.classList.remove('hidden');
@@ -76,40 +88,91 @@ async function loadAllData() {
         const resChamp = await fetch(`${API_URL}?sheet=Championship`);
         championshipData = await resChamp.json();
         renderChampionships(championshipData);
-        setupStreams(championshipData);
 
         const resSanda = await fetch(`${API_URL}?sheet=Sanda`);
-        sandaData = await resSanda.json();
+        sandaDataRaw = await resSanda.json();
 
         const resLlaves = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
-        llavesSandaData = await resLlaves.json();
-
-        initSandaModule(sandaData, llavesSandaData);
+        llavesSandaDataRaw = await resLlaves.json();
 
         const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
-        taoluData = await resTaolu.json();
-        renderTaoluGroups(taoluData);
+        taoluDataRaw = await resTaolu.json();
 
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
-        medalleroData = await resMedall.json();
-        renderMedalleroAndPodium(medalleroData);
-        renderGeneralDeportistasFromMedallero(medalleroData);
+        medalleroDataRaw = await resMedall.json();
     } catch (err) {
         console.error("Error conectando con Google Sheets:", err);
-        setupStreams([]);
     }
+}
+
+function selectChampionship(nombreCampeonato) {
+    currentActiveChampionship = nombreCampeonato;
+
+    const badge = document.getElementById('active-championship-badge');
+    const headerName = document.getElementById('header-champ-name');
+    const sandaTitleBadge = document.getElementById('current-champ-title-sanda');
+
+    if (badge && headerName) {
+        headerName.innerText = nombreCampeonato;
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+    }
+    if (sandaTitleBadge) {
+        sandaTitleBadge.innerText = nombreCampeonato;
+    }
+
+    const activeChampObj = championshipData.find(c => (c.Nombre_Campeonato || c.nombre_campeonato) === nombreCampeonato) || championshipData[0] || {};
+    setupStreamsForChamp(activeChampObj);
+
+    const filteredSanda = sandaDataRaw.filter(row => {
+        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+    });
+
+    const filteredLlaves = llavesSandaDataRaw.filter(row => {
+        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+    });
+
+    initSandaModule(filteredSanda, filteredLlaves);
+
+    const filteredTaolu = taoluDataRaw.filter(row => {
+        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+    });
+    renderTaoluGroups(filteredTaolu);
+
+    const filteredMedallero = medalleroDataRaw.filter(row => {
+        const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+        return !champ || champ.toLowerCase() === nombreCampeonato.toLowerCase();
+    });
+    renderMedalleroAndPodium(filteredMedallero);
+    renderGeneralDeportistasFromMedallero(filteredMedallero);
+
+    switchView('sanda');
 }
 
 async function syncTaoluData() {
     try {
         const resTaolu = await fetch(`${API_URL}?sheet=Taolu`);
-        taoluData = await resTaolu.json();
-        renderTaoluGroups(taoluData);
-
+        taoluDataRaw = await resTaolu.json();
         const resMedall = await fetch(`${API_URL}?sheet=Medallero`);
-        medalleroData = await resMedall.json();
-        renderMedalleroAndPodium(medalleroData);
-        renderGeneralDeportistasFromMedallero(medalleroData);
+        medalleroDataRaw = await resMedall.json();
+
+        const activeChamp = currentActiveChampionship || (championshipData[0] ? (championshipData[0].Nombre_Campeonato || championshipData[0].nombre_campeonato) : "");
+
+        const filteredTaolu = taoluDataRaw.filter(row => {
+            const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+            return !champ || champ.toLowerCase() === activeChamp.toLowerCase();
+        });
+        renderTaoluGroups(filteredTaolu);
+
+        const filteredMedallero = medalleroDataRaw.filter(row => {
+            const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+            return !champ || champ.toLowerCase() === activeChamp.toLowerCase();
+        });
+        renderMedalleroAndPodium(filteredMedallero);
+        renderGeneralDeportistasFromMedallero(filteredMedallero);
 
         alert("¡Puntajes y puestos actualizados correctamente desde Google Sheets!");
     } catch (err) {
@@ -146,7 +209,7 @@ function renderChampionships(data) {
         const fechaStr = (fechaInicio && fechaFin) ? `${fechaInicio} - ${fechaFin}` : (fechaInicio || fechaFin || "");
 
         return `
-            <div class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[340px] flex flex-col justify-end p-6 bg-slate-900">
+            <div onclick="selectChampionship('${nombre.replace(/'/g, "\\'")}')" class="relative rounded-2xl overflow-hidden border border-mmcBorder group shadow-2xl min-h-[340px] flex flex-col justify-end p-6 bg-slate-900 cursor-pointer hover:border-mmcGold transition-all duration-300">
                 ${bannerUrl ? `<div class="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style="background-image: url('${bannerUrl}');"></div>` : `<div class="absolute inset-0 bg-slate-950"></div>`}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20"></div>
                 <div class="relative z-10 space-y-3">
@@ -158,7 +221,7 @@ function renderChampionships(data) {
                         ${fechaStr ? `<p class="flex items-center"><i class="fa-regular fa-calendar mr-2 text-mmcGold"></i> ${fechaStr}</p>` : ''}
                         <p class="flex items-center"><i class="fa-solid fa-location-dot mr-2 text-mmcGold"></i> ${sede}</p>
                     </div>
-                    <button onclick="switchView('sanda')" class="w-full mt-2 bg-mmcGold hover:bg-yellow-600 text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg flex items-center justify-center space-x-2">
+                    <button class="w-full mt-2 bg-mmcGold hover:bg-yellow-600 text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg flex items-center justify-center space-x-2">
                         <span>Ingresar a la Competencia</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
@@ -168,14 +231,12 @@ function renderChampionships(data) {
     }).join('');
 }
 
-function setupStreams(champData) {
+function setupStreamsForChamp(activeChamp) {
     const sandaContainer = document.getElementById('sanda-stream-container');
     const taoluContainer = document.getElementById('taolu-stream-container');
     const sandaBadge = document.getElementById('sanda-badge-container');
     const taoluBadge = document.getElementById('taolu-badge-container');
 
-    const activeChamp = champData && champData.length > 0 ? champData[0] : {};
-    
     const sandaUrl = activeChamp.Transmision_Sanda || activeChamp.transmision_sanda || "";
     const sandaEstado = (activeChamp.Estado_Sanda || activeChamp.estado_sanda || "").trim().toUpperCase();
 
@@ -297,13 +358,18 @@ let timerInterval = null;
 let secondsLeft = 120;
 let currentRound = 1;
 let isResting = false;
+let activeFilteredSanda = [];
+let activeFilteredLlaves = [];
 
-function initSandaModule(data, llavesData) {
+function initSandaModule(filteredSanda, filteredLlaves) {
+    activeFilteredSanda = filteredSanda;
+    activeFilteredLlaves = filteredLlaves;
+
     const selectEl = document.getElementById('sanda-category-select');
     if (!selectEl) return;
 
     const categories = {};
-    data.forEach(row => {
+    filteredSanda.forEach(row => {
         const edad = row.Rango_Edad || row.rango_edad || "";
         const nivel = row.Nivel || row.nivel || "";
         const genero = row.Genero || row.genero || "";
@@ -316,7 +382,8 @@ function initSandaModule(data, llavesData) {
 
     const catKeys = Object.keys(categories);
     if (catKeys.length === 0) {
-        selectEl.innerHTML = `<option value="">No hay categorías configuradas</option>`;
+        selectEl.innerHTML = `<option value="">No hay categorías en este campeonato</option>`;
+        document.getElementById('tournament-brackets-container.innerHTML') = "";
         return;
     }
 
@@ -337,7 +404,7 @@ function filterSandaCategory(categoryName) {
     document.getElementById('bracket-category-title').innerText = categoryName;
     document.getElementById('bracket-subtitle-info').innerText = `Sanda • Categoría: ${categoryName} • Eliminación Directa`;
 
-    const filtered = sandaData.filter(row => {
+    const filtered = activeFilteredSanda.filter(row => {
         const edad = row.Rango_Edad || row.rango_edad || "";
         const nivel = row.Nivel || row.nivel || "";
         const genero = row.Genero || row.genero || "";
@@ -349,7 +416,7 @@ function filterSandaCategory(categoryName) {
     currentMatchLevel = sampleNivel.includes("NOVEL") ? "NOVEL" : "AVANZADO";
     resetTimer();
 
-    renderTournamentBracketsTree(filtered, llavesSandaData);
+    renderTournamentBracketsTree(filtered, activeFilteredLlaves);
     
     if (filtered.length > 0) {
         const pairs = {};
@@ -375,8 +442,8 @@ function filterSandaCategory(categoryName) {
                 logo: redDni ? convertToDirectDriveUrl(r.URL_Logo || r.url_logo || "") : ""
             }, {
                 name: blueDni ? (b.Nombre_Completo || b.nombre_completo) : (b.Ganador_a_Ingresar || b.ganador_a_ingresar || "Por definir"),
-                siglas: blueDni ? (b.Siglas || b.siglas || "UPCH") : "",
-                inst: blueDni ? (b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Universidad Peruana Cayetano Heredia") : "",
+                siglas: blueDni ? (b.Siglas || b.siglas || "MMC") : "",
+                inst: blueDni ? (b.Nombre_Escuela || b.nombre_escuela || b.Institucion || b.institucion || "Master Martial Combat") : "",
                 photo: blueDni ? convertToDirectDriveUrl(b.URL_Foto || b.url_foto || "") : "",
                 logo: blueDni ? convertToDirectDriveUrl(b.URL_Logo || b.url_logo || "") : ""
             }, firstKey);
@@ -552,15 +619,22 @@ function selectSandaMatch(red, blue, llaveId) {
 async function syncMatchData() {
     try {
         const res = await fetch(`${API_URL}?sheet=Llaves_Sanda`);
-        llavesSandaData = await res.json();
+        llavesSandaDataRaw = await res.json();
+        
+        const activeChamp = currentActiveChampionship || "";
+        activeFilteredLlaves = llavesSandaDataRaw.filter(row => {
+            const champ = (row.Nombre_Campeonato || row.nombre_campeonato || "").trim();
+            return !champ || champ.toLowerCase() === activeChamp.toLowerCase();
+        });
+
         updateRoundCirclesFromSheets();
-        renderTournamentBracketsTree(sandaData.filter(row => {
+        renderTournamentBracketsTree(activeFilteredSanda.filter(row => {
             const edad = row.Rango_Edad || row.rango_edad || "";
             const nivel = row.Nivel || row.nivel || "";
             const genero = row.Genero || row.genero || "";
             const peso = row.Peso || row.peso || "";
             return `${edad} ${nivel} ${genero} ${peso} KG`.trim() === currentCategoryFiltered;
-        }), llavesSandaData);
+        }), activeFilteredLlaves);
         alert("¡Datos, ganadores y estado de rounds actualizados desde Google Sheets!");
     } catch (e) {
         console.error("Error al sincronizar datos:", e);
@@ -569,7 +643,7 @@ async function syncMatchData() {
 
 function updateRoundCirclesFromSheets() {
     if (!currentActiveLlave) return;
-    const llaveRow = llavesSandaData.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda) === currentActiveLlave);
+    const llaveRow = activeFilteredLlaves.find(row => (row.ID_Llave_Sanda || row.id_llave_sanda) === currentActiveLlave);
 
     const r1 = llaveRow ? (llaveRow.Round1 || llaveRow.round1 || "-") : "-";
     const r2 = llaveRow ? (llaveRow.Round2 || llaveRow.round2 || "-") : "-";
@@ -721,7 +795,8 @@ function renderTaoluGroups(data) {
     if (!container) return;
 
     if (!data || data.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay registros de Taolu disponibles.</p>`;
+        container.innerHTML = `<p class="text-gray-400 text-center py-4">No hay registros de Taolu para este campeonato.</p>`;
+        if (selectContainer) selectContainer.innerHTML = `<option value="">Sin grupos</option>`;
         return;
     }
 
@@ -866,6 +941,12 @@ function renderMedalleroAndPodium(data) {
     const podiumContainer = document.getElementById('podium-container');
     if (!tableContainer || !podiumContainer) return;
 
+    if (!data || data.length === 0) {
+        podiumContainer.innerHTML = `<p class="text-gray-400 text-center py-6">No hay registros en el medallero para este campeonato.</p>`;
+        tableContainer.innerHTML = `<p class="text-gray-400 text-center py-4">Sin datos de escuelas.</p>`;
+        return;
+    }
+
     const totals = {};
     data.forEach(row => {
         const esc = row.Nombre_Escuela || row.nombre_escuela || 'Independiente';
@@ -950,7 +1031,7 @@ function renderGeneralDeportistasFromMedallero(medalleroRows) {
     if (!container) return;
 
     if (!medalleroRows || medalleroRows.length === 0) {
-        container.innerHTML = `<p class="text-slate-500 text-center py-4">No hay registros en la hoja Medallero.</p>`;
+        container.innerHTML = `<p class="text-slate-500 text-center py-4">No hay registros en la hoja Medallero para este campeonato.</p>`;
         return;
     }
 
